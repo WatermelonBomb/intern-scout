@@ -102,9 +102,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="bg-gray-50 px-6 py-3">
                     <div className="text-sm">
-                      <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                      <button
+                        onClick={() => router.push('/messages')}
+                        className="font-medium text-blue-600 hover:text-blue-500"
+                      >
                         すべて見る
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -191,9 +194,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="bg-gray-50 px-6 py-3">
                     <div className="text-sm">
-                      <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                      <button
+                        onClick={() => router.push('/search')}
+                        className="font-medium text-blue-600 hover:text-blue-500"
+                      >
                         検索開始
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -249,9 +255,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="bg-gray-50 px-6 py-3">
                     <div className="text-sm">
-                      <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
+                      <button
+                        onClick={() => router.push('/messages')}
+                        className="font-medium text-purple-600 hover:text-purple-500"
+                      >
                         履歴を見る
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
