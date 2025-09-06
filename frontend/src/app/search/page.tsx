@@ -39,15 +39,14 @@ export default function StudentSearchPage() {
     }
   }, [user]);
 
-  useEffect(() => {
-    applyFilters();
-  }, [students, filters]);
-
-  const loadStudents = async () => {
+  const loadStudents = async (searchParams?: any) => {
     setSearchLoading(true);
     try {
-      const response = await users.index();
+      const response = searchParams && Object.keys(searchParams).length > 0 
+        ? await users.search(searchParams)
+        : await users.index();
       setStudents(response.data);
+      setFilteredStudents(response.data);
     } catch (error) {
       console.error('Failed to load students:', error);
     } finally {
@@ -55,48 +54,13 @@ export default function StudentSearchPage() {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...students];
-
-    if (filters.skills) {
-      const searchSkills = filters.skills.toLowerCase().split(',').map(s => s.trim());
-      filtered = filtered.filter(student => {
-        if (!student.skills) return false;
-        const studentSkills = student.skills.toLowerCase();
-        return searchSkills.some(skill => studentSkills.includes(skill));
-      });
-    }
-
-    if (filters.university) {
-      filtered = filtered.filter(student =>
-        student.university?.toLowerCase().includes(filters.university.toLowerCase())
-      );
-    }
-
-    if (filters.graduation_year) {
-      filtered = filtered.filter(student =>
-        student.graduation_year?.toString() === filters.graduation_year
-      );
-    }
-
-    setFilteredStudents(filtered);
-  };
-
   const handleSearch = async () => {
-    setSearchLoading(true);
-    try {
-      const searchParams: any = {};
-      if (filters.skills) searchParams.skills = filters.skills;
-      if (filters.university) searchParams.university = filters.university;
-      if (filters.graduation_year) searchParams.graduation_year = filters.graduation_year;
+    const searchParams: any = {};
+    if (filters.skills) searchParams.skills = filters.skills;
+    if (filters.university) searchParams.university = filters.university;
+    if (filters.graduation_year) searchParams.graduation_year = filters.graduation_year;
 
-      const response = await users.search(searchParams);
-      setStudents(response.data);
-    } catch (error) {
-      console.error('Search failed:', error);
-    } finally {
-      setSearchLoading(false);
-    }
+    await loadStudents(searchParams);
   };
 
   const handleSendMessage = async () => {
