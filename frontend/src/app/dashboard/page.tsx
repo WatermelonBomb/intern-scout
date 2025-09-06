@@ -163,9 +163,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="bg-gray-50 px-6 py-3">
                     <div className="text-sm">
-                      <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
+                      <button
+                        onClick={() => router.push('/profile')}
+                        className="font-medium text-purple-600 hover:text-purple-500"
+                      >
                         プロフィール編集
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
