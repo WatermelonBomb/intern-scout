@@ -134,9 +134,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="bg-gray-50 px-6 py-3">
                     <div className="text-sm">
-                      <a href="#" className="font-medium text-green-600 hover:text-green-500">
+                      <button
+                        onClick={() => router.push('/jobs')}
+                        className="font-medium text-green-600 hover:text-green-500"
+                      >
                         求人を見る
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -229,9 +232,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="bg-gray-50 px-6 py-3">
                     <div className="text-sm">
-                      <a href="#" className="font-medium text-green-600 hover:text-green-500">
-                        新規投稿
-                      </a>
+                      <button
+                        onClick={() => router.push('/jobs')}
+                        className="font-medium text-green-600 hover:text-green-500"
+                      >
+                        管理・投稿
+                      </button>
                     </div>
                   </div>
                 </div>
