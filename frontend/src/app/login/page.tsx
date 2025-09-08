@@ -23,7 +23,21 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/dashboard');
     } catch (err: any) {
-      const errorMessage = err.response?.data?.errors?.[0] || err.response?.data?.errors || 'ログインに失敗しました';
+      console.error('Login error:', err);
+      let errorMessage = 'ログインに失敗しました';
+      
+      if (err.response?.data?.errors) {
+        if (Array.isArray(err.response.data.errors)) {
+          errorMessage = err.response.data.errors[0];
+        } else {
+          errorMessage = err.response.data.errors;
+        }
+      } else if (err.response?.status === 401) {
+        errorMessage = 'メールアドレスまたはパスワードが正しくありません';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -48,6 +62,15 @@ export default function LoginPage() {
               新規登録
             </Link>
           </p>
+          
+          {/* Demo credentials */}
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <h3 className="text-sm font-medium text-blue-900 mb-2">デモアカウント</h3>
+            <div className="text-xs text-blue-800 space-y-1">
+              <div><strong>学生:</strong> test@example.com / password123</div>
+              <div><strong>企業:</strong> company@example.com / password123</div>
+            </div>
+          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

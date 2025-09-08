@@ -11,8 +11,11 @@ export default function MessagesPage() {
   
   const [messageList, setMessageList] = useState<Message[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [showMessageDetail, setShowMessageDetail] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<{user: any, messages: Message[]} | null>(null);
+  
+  // Reply functionality - always visible
+  const [replyContent, setReplyContent] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,12 +41,26 @@ export default function MessagesPage() {
     }
   };
 
-  const handleMessageClick = async (message: Message) => {
-    setSelectedMessage(message);
-    setShowMessageDetail(true);
+  const handleConversationClick = async (clickedMessage: Message) => {
+    const otherUser = clickedMessage.sender.id === user?.id ? clickedMessage.receiver : clickedMessage.sender;
+    
+    // Get all messages between current user and the other user
+    const conversationMessages = messageList.filter(msg => 
+      (msg.sender.id === user?.id && msg.receiver.id === otherUser.id) ||
+      (msg.sender.id === otherUser.id && msg.receiver.id === user?.id)
+    ).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    
+    setSelectedConversation({
+      user: otherUser,
+      messages: conversationMessages
+    });
 
-    // Mark as read if user is receiver and message is unread
-    if (message.receiver.id === user?.id && !message.read) {
+    // Mark unread messages as read
+    const unreadMessages = conversationMessages.filter(msg => 
+      msg.receiver.id === user?.id && !msg.read
+    );
+    
+    for (const message of unreadMessages) {
       try {
         await messages.markAsRead(message.id);
         // Update local state
@@ -53,6 +70,40 @@ export default function MessagesPage() {
       } catch (error) {
         console.error('Failed to mark message as read:', error);
       }
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!selectedConversation || !replyContent.trim()) {
+      return;
+    }
+
+    setSendingReply(true);
+    try {
+      const response = await messages.create({
+        receiver_id: selectedConversation.user.id,
+        subject: `Re: 会話`,
+        content: replyContent
+      });
+
+      // Add the new message to the conversation
+      const newMessage = response.data;
+      setSelectedConversation(prev => prev ? {
+        ...prev,
+        messages: [...prev.messages, newMessage]
+      } : null);
+
+      // Also add to the main message list
+      setMessageList(prev => [newMessage, ...prev]);
+      
+      // Reset form
+      setReplyContent('');
+      
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.errors?.[0] || 'メッセージの送信に失敗しました';
+      alert(errorMessage);
+    } finally {
+      setSendingReply(false);
     }
   };
 
@@ -112,22 +163,22 @@ export default function MessagesPage() {
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
-              メッセージ
+              チャット
             </h1>
             <p className="mt-2 text-gray-600">
               {user.user_type === 'student' 
-                ? '企業からのスカウトメッセージを確認できます' 
-                : '送信したメッセージの履歴を確認できます'
+                ? '企業とのメッセージのやり取りができます' 
+                : '学生とのメッセージのやり取りができます'
               }
             </p>
           </div>
 
-          <div className="flex h-96 bg-white shadow rounded-lg overflow-hidden">
+          <div className="flex h-[600px] bg-white shadow rounded-lg overflow-hidden">
             {/* Message List */}
             <div className="w-1/3 border-r border-gray-200">
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-medium text-gray-900">
-                  メッセージ一覧
+                  会話一覧
                 </h2>
               </div>
               <div className="overflow-y-auto h-full">
@@ -149,45 +200,55 @@ export default function MessagesPage() {
                     </p>
                   </div>
                 ) : (
-                  messageList.map((message) => (
+                  // Group messages by conversation partner
+                  Array.from(new Map(
+                    messageList.map(msg => {
+                      const otherUser = msg.sender.id === user?.id ? msg.receiver : msg.sender;
+                      return [otherUser.id, {
+                        otherUser,
+                        latestMessage: msg,
+                        unreadCount: messageList.filter(m => 
+                          ((m.sender.id === otherUser.id && m.receiver.id === user?.id) ||
+                           (m.sender.id === user?.id && m.receiver.id === otherUser.id)) &&
+                          m.receiver.id === user?.id && !m.read
+                        ).length
+                      }];
+                    })
+                  ).values()).map((conversation) => (
                     <div
-                      key={message.id}
-                      onClick={() => handleMessageClick(message)}
+                      key={conversation.otherUser.id}
+                      onClick={() => handleConversationClick(conversation.latestMessage)}
                       className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 ${
-                        selectedMessage?.id === message.id ? 'bg-blue-50 border-blue-200' : ''
+                        selectedConversation?.user.id === conversation.otherUser.id ? 'bg-blue-50 border-blue-200' : ''
                       }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
-                              {user.user_type === 'student' 
-                                ? message.sender.full_name[0]
-                                : message.receiver.full_name[0]
-                              }
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <span className="text-white font-semibold">
+                              {conversation.otherUser.full_name[0]}
                             </span>
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <p className="text-sm font-medium text-gray-900 truncate">
-                              {user.user_type === 'student' 
-                                ? message.sender.full_name
-                                : `To: ${message.receiver.full_name}`
-                              }
+                              {conversation.otherUser.full_name}
                             </p>
-                            {user.user_type === 'student' && !message.read && (
-                              <span className="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                            {conversation.unreadCount > 0 && (
+                              <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                                {conversation.unreadCount}
+                              </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-900 font-medium truncate">
-                            {message.subject}
+                          <p className="text-xs text-gray-500 mb-1">
+                            {conversation.otherUser.user_type === 'company' ? '企業' : '学生'}
                           </p>
-                          <p className="text-sm text-gray-500 truncate">
-                            {message.content}
+                          <p className="text-sm text-gray-600 truncate">
+                            {conversation.latestMessage.content}
                           </p>
                           <p className="text-xs text-gray-400 mt-1">
-                            {formatDate(message.created_at)}
+                            {formatDate(conversation.latestMessage.created_at)}
                           </p>
                         </div>
                       </div>
@@ -197,61 +258,93 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            {/* Message Detail */}
-            <div className="flex-1">
-              {selectedMessage ? (
-                <div className="h-full flex flex-col">
+            {/* Chat Area */}
+            <div className="flex-1 flex flex-col">
+              {selectedConversation ? (
+                <>
+                  {/* Chat Header */}
                   <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-sm">
+                          {selectedConversation.user.full_name[0]}
+                        </span>
+                      </div>
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
-                          {selectedMessage.subject}
+                          {selectedConversation.user.full_name}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {user.user_type === 'student' 
-                            ? `From: ${selectedMessage.sender.full_name}`
-                            : `To: ${selectedMessage.receiver.full_name}`
-                          } • {formatDate(selectedMessage.created_at)}
+                          {selectedConversation.user.user_type === 'company' ? '企業' : '学生'}
                         </p>
                       </div>
-                      <button
-                        onClick={() => setShowMessageDetail(false)}
-                        className="text-gray-400 hover:text-gray-600"
+                    </div>
+                  </div>
+
+                  {/* Messages Area */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                    {selectedConversation.messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.sender.id === user?.id ? 'justify-end' : 'justify-start'}`}
                       >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                          message.sender.id === user?.id 
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-white text-gray-900 border'
+                        }`}>
+                          <div className="text-sm whitespace-pre-line">
+                            {message.content}
+                          </div>
+                          <div className={`text-xs mt-2 ${
+                            message.sender.id === user?.id ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {formatDate(message.created_at)}
+                            {message.sender.id !== user?.id && message.read && ' • 既読'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Reply Form - Always Visible */}
+                  <div className="border-t border-gray-200 p-4 bg-white">
+                    <div className="flex items-end space-x-2">
+                      <div className="flex-1">
+                        <textarea
+                          rows={2}
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="メッセージを入力..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSendReply();
+                            }
+                          }}
+                        />
+                      </div>
+                      <button
+                        onClick={handleSendReply}
+                        disabled={sendingReply || !replyContent.trim()}
+                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
                       </button>
                     </div>
                   </div>
-                  <div className="flex-1 p-6 overflow-y-auto">
-                    <div className="prose max-w-none">
-                      <div className="whitespace-pre-line text-gray-900">
-                        {selectedMessage.content}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border-t border-gray-200 px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-500">
-                        {selectedMessage.read ? '既読' : '未読'}
-                      </div>
-                      {user.user_type === 'student' && (
-                        <div className="text-sm text-gray-500">
-                          スカウトメッセージへの返信は、送信者のメールアドレスに直接お返事ください
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                </>
               ) : (
-                <div className="h-full flex items-center justify-center">
+                <div className="h-full flex items-center justify-center bg-gray-50">
                   <div className="text-center">
                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">メッセージを選択してください</h3>
-                    <p className="mt-1 text-sm text-gray-500">左側のリストからメッセージをクリックして詳細を表示</p>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">会話を選択してください</h3>
+                    <p className="mt-1 text-sm text-gray-500">左側のリストから会話をクリックしてチャットを開始</p>
                   </div>
                 </div>
               )}

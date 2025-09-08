@@ -64,6 +64,20 @@ export interface Message {
   receiver: User;
 }
 
+export interface Conversation {
+  id: number;
+  other_user: User;
+  last_message?: {
+    id: number;
+    content: string;
+    created_at: string;
+    sender_id: number;
+  };
+  last_message_at?: string;
+  unread_count: number;
+  created_at: string;
+}
+
 export interface JobPosting {
   id: number;
   title: string;
@@ -99,6 +113,13 @@ export const messages = {
   show: (id: number) => api.get(`/messages/${id}`),
   create: (data: any) => api.post('/messages', data),
   markAsRead: (id: number) => api.patch(`/messages/${id}/mark_as_read`),
+};
+
+// Conversations API
+export const conversations = {
+  index: () => api.get('/conversations'),
+  show: (id: number) => api.get(`/conversations/${id}`),
+  create: (userId: number) => api.post('/conversations', { user_id: userId }),
 };
 
 // Job Postings API
