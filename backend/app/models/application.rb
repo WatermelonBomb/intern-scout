@@ -1,6 +1,7 @@
 class Application < ApplicationRecord
   belongs_to :student, class_name: 'User'
   belongs_to :job_posting
+  has_many :selection_processes, dependent: :destroy
 
   validates :cover_letter, presence: true
   validates :status, inclusion: { in: %w[pending reviewed accepted rejected] }
@@ -32,15 +33,24 @@ class Application < ApplicationRecord
   end
 
   def mark_as_reviewed!
-    update!(status: 'reviewed', reviewed_at: Time.current)
+    transaction do
+      update!(status: 'reviewed', reviewed_at: Time.current)
+      create_conversation_and_initial_message if status_changed?
+    end
   end
 
   def accept!
-    update!(status: 'accepted', reviewed_at: Time.current)
+    transaction do
+      update!(status: 'accepted', reviewed_at: Time.current)
+      create_acceptance_message
+    end
   end
 
   def reject!
-    update!(status: 'rejected', reviewed_at: Time.current)
+    transaction do
+      update!(status: 'rejected', reviewed_at: Time.current)
+      create_rejection_message
+    end
   end
 
   private
@@ -59,5 +69,44 @@ class Application < ApplicationRecord
     if job_posting.deadline < Date.current
       errors.add(:base, "応募締切を過ぎています")
     end
+  end
+
+  def create_conversation_and_initial_message
+    company = job_posting.company
+    conversation = Conversation.find_or_create_between(company, student)
+    
+    Message.create!(
+      sender: company,
+      receiver: student,
+      conversation: conversation,
+      subject: "応募確認のお知らせ - #{job_posting.title}",
+      content: "#{student.full_name}様、この度は弊社の求人「#{job_posting.title}」にご応募いただき、ありがとうございます。\n\n応募内容を確認させていただきました。選考に関する詳細につきまして、こちらのメッセージ機能を通じてご連絡させていただきます。\n\nよろしくお願いいたします。"
+    )
+  end
+
+  def create_acceptance_message
+    company = job_posting.company
+    conversation = Conversation.find_or_create_between(company, student)
+    
+    Message.create!(
+      sender: company,
+      receiver: student,
+      conversation: conversation,
+      subject: "選考結果のお知らせ（合格） - #{job_posting.title}",
+      content: "#{student.full_name}様、この度は弊社の求人「#{job_posting.title}」にご応募いただき、ありがとうございました。\n\n選考の結果、合格とさせていただきました。おめでとうございます！\n\n今後の手続きに関する詳細につきまして、別途ご連絡させていただきます。\n\nよろしくお願いいたします。"
+    )
+  end
+
+  def create_rejection_message
+    company = job_posting.company
+    conversation = Conversation.find_or_create_between(company, student)
+    
+    Message.create!(
+      sender: company,
+      receiver: student,
+      conversation: conversation,
+      subject: "選考結果のお知らせ - #{job_posting.title}",
+      content: "#{student.full_name}様、この度は弊社の求人「#{job_posting.title}」にご応募いただき、ありがとうございました。\n\n慎重に選考させていただきました結果、今回は残念ながらご希望に添えない結果となりました。\n\n今後とも弊社をよろしくお願いいたします。"
+    )
   end
 end

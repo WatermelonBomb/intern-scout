@@ -37,6 +37,22 @@ Rails.application.routes.draw do
       # Applications
       resources :applications, only: [:index, :show, :update, :destroy]
       
+      # Invitations (scouting)
+      resources :invitations, only: [:index, :show, :create, :destroy] do
+        member do
+          patch :accept
+          patch :reject
+        end
+      end
+      
+      # Selection Processes
+      resources :selection_processes, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          patch :start
+          patch :complete
+        end
+      end
+      
       # Dashboard
       get 'dashboard/stats', to: 'dashboard#stats'
     end

@@ -14,6 +14,10 @@ class User < ApplicationRecord
   has_many :applications, foreign_key: 'student_id', dependent: :destroy
   has_many :applied_job_postings, through: :applications, source: :job_posting
   
+  # Invitations (scouting)
+  has_many :sent_invitations, class_name: 'Invitation', foreign_key: 'company_id', dependent: :destroy
+  has_many :received_invitations, class_name: 'Invitation', foreign_key: 'student_id', dependent: :destroy
+  
   has_many :user1_conversations, class_name: 'Conversation', foreign_key: 'user1_id'
   has_many :user2_conversations, class_name: 'Conversation', foreign_key: 'user2_id'
 
@@ -22,6 +26,10 @@ class User < ApplicationRecord
   
   def full_name
     "#{first_name} #{last_name}"
+  end
+  
+  def name
+    full_name
   end
   
   def student?

@@ -2,6 +2,8 @@ class JobPosting < ApplicationRecord
   belongs_to :company
   has_many :applications, dependent: :destroy
   has_many :applicants, through: :applications, source: :student
+  has_many :invitations, dependent: :destroy
+  has_many :invited_students, through: :invitations, source: :student
   
   validates :title, :description, presence: true
   validates :employment_type, inclusion: { in: %w[internship part_time full_time contract] }
