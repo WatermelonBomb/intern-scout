@@ -19,7 +19,7 @@ class Api::V1::JobPostingsController < ApplicationController
     end
     
     # Map salary to salary_range and application_deadline to deadline
-    job_params = job_posting_params
+    job_params = job_posting_params.except(:salary, :application_deadline)
     job_params[:salary_range] = params[:salary] if params[:salary].present?
     job_params[:deadline] = params[:application_deadline] if params[:application_deadline].present?
     

@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { users, messages, User } from '@/lib/api';
 
 export default function StudentSearchPage() {
-  const { user, loading } = useAuth();
+  const { user, company, loading, isCompany } = useAuth();
   const router = useRouter();
   
   const [students, setStudents] = useState<User[]>([]);
@@ -28,16 +28,16 @@ export default function StudentSearchPage() {
   });
 
   useEffect(() => {
-    if (!loading && (!user || !user.company)) {
+    if (!loading && (!user || !isCompany)) {
       router.push('/dashboard');
     }
-  }, [user, loading, router]);
+  }, [user, loading, isCompany, router]);
 
   useEffect(() => {
-    if (user?.user_type === 'company') {
+    if (isCompany) {
       loadStudents();
     }
-  }, [user]);
+  }, [isCompany]);
 
   const loadStudents = async (searchParams?: any) => {
     setSearchLoading(true);
@@ -97,7 +97,7 @@ export default function StudentSearchPage() {
 あなたのプロフィールを拝見し、弊社でのインターンシップにご興味をお持ちいただけないかと思い、ご連絡いたしました。
 
 【会社概要】
-${user?.company?.name}
+${company?.name}
 
 【インターンシップ内容】
 （具体的な業務内容をご記載ください）
@@ -118,7 +118,7 @@ ${user?.company?.name}
     );
   }
 
-  if (!user || user.user_type !== 'company') {
+  if (!user || !isCompany) {
     return null;
   }
 
