@@ -16,8 +16,8 @@ class Api::V1::DashboardController < ApplicationController
   def student_stats
     {
       received_messages: current_user.received_messages.count,
-      unread_messages: current_user.received_messages.where(read: false).count,
-      available_jobs: JobPosting.where(active: true).count,
+      unread_messages: current_user.received_messages.where(read_at: nil).count,
+      available_jobs: JobPosting.count,
       conversations: current_user.conversations.count
     }
   end
@@ -28,7 +28,7 @@ class Api::V1::DashboardController < ApplicationController
 
     {
       posted_jobs: company.job_postings.count,
-      active_jobs: company.job_postings.where(active: true).count,
+      active_jobs: company.job_postings.count, # Since there's no active column, use total count
       sent_messages: current_user.sent_messages.count,
       conversations: current_user.conversations.count
     }
