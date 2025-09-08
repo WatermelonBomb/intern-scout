@@ -9,6 +9,9 @@ class User < ApplicationRecord
   has_many :received_messages, class_name: 'Message', foreign_key: 'receiver_id'
   has_many :companies, dependent: :destroy
   has_many :job_postings, through: :companies
+  
+  has_many :user1_conversations, class_name: 'Conversation', foreign_key: 'user1_id'
+  has_many :user2_conversations, class_name: 'Conversation', foreign_key: 'user2_id'
 
   scope :students, -> { where(user_type: 'student') }
   scope :companies, -> { where(user_type: 'company') }
@@ -23,5 +26,13 @@ class User < ApplicationRecord
   
   def company?
     user_type == 'company'
+  end
+
+  def conversations
+    Conversation.for_user(self).recent
+  end
+
+  def conversation_with(other_user)
+    Conversation.between(self, other_user)
   end
 end

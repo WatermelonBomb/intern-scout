@@ -20,28 +20,34 @@ class Api::V1::MessagesController < ApplicationController
   end
 
   def create
-    # Only companies can send messages to students
-    unless current_user.company?
-      render json: { errors: ['Only companies can send messages'] }, status: :forbidden
-      return
-    end
-    
     receiver = User.find(params[:receiver_id])
-    unless receiver.student?
-      render json: { errors: ['Messages can only be sent to students'] }, status: :unprocessable_entity
+    
+    # Allow bidirectional messaging between students and companies
+    unless (current_user.company? && receiver.student?) || (current_user.student? && receiver.company?)
+      render json: { errors: ['Messages can only be sent between students and companies'] }, status: :forbidden
       return
     end
     
     message = current_user.sent_messages.build(message_params)
     message.receiver = receiver
     
+    # If conversation_id is provided, associate the message with the conversation
+    if params[:conversation_id].present?
+      conversation = current_user.conversations.find(params[:conversation_id])
+      message.conversation = conversation
+    end
+    
     if message.save
       render json: message_response(message), status: :created
     else
       render json: { errors: message.errors.full_messages }, status: :unprocessable_entity
     end
-  rescue ActiveRecord::RecordNotFound
-    render json: { errors: ['Receiver not found'] }, status: :not_found
+  rescue ActiveRecord::RecordNotFound => e
+    if e.message.include?('Conversation')
+      render json: { errors: ['Conversation not found'] }, status: :not_found
+    else
+      render json: { errors: ['Receiver not found'] }, status: :not_found
+    end
   end
   
   def mark_as_read
@@ -62,7 +68,7 @@ class Api::V1::MessagesController < ApplicationController
   end
 
   def message_params
-    params.permit(:subject, :content, :receiver_id)
+    params.permit(:subject, :content, :receiver_id, :conversation_id)
   end
   
   def message_response(message)

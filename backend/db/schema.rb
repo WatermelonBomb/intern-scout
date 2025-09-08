@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_06_082517) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_08_075335) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -24,6 +24,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_082517) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_companies_on_user_id"
+  end
+
+  create_table "conversations", force: :cascade do |t|
+    t.bigint "user1_id", null: false
+    t.bigint "user2_id", null: false
+    t.datetime "last_message_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user1_id", "user2_id"], name: "index_conversations_on_user1_id_and_user2_id", unique: true
+    t.index ["user2_id", "user1_id"], name: "index_conversations_on_user2_id_and_user1_id", unique: true
   end
 
   create_table "job_postings", force: :cascade do |t|
@@ -48,6 +58,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_082517) do
     t.datetime "read_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "conversation_id"
+    t.index ["conversation_id"], name: "index_messages_on_conversation_id"
     t.index ["receiver_id"], name: "index_messages_on_receiver_id"
     t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
@@ -69,7 +81,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_06_082517) do
   end
 
   add_foreign_key "companies", "users"
+  add_foreign_key "conversations", "users", column: "user1_id"
+  add_foreign_key "conversations", "users", column: "user2_id"
   add_foreign_key "job_postings", "companies"
+  add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "users", column: "receiver_id"
   add_foreign_key "messages", "users", column: "sender_id"
 end

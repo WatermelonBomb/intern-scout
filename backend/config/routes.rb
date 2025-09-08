@@ -26,6 +26,9 @@ Rails.application.routes.draw do
         end
       end
       
+      # Conversations
+      resources :conversations, only: [:index, :show, :create]
+      
       # Job Postings
       resources :job_postings, only: [:index, :show, :create, :update, :destroy]
     end
