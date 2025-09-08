@@ -1,5 +1,4 @@
 class Api::V1::DashboardController < ApplicationController
-  before_action :authenticate_user
 
   def stats
     case current_user.user_type
@@ -24,7 +23,7 @@ class Api::V1::DashboardController < ApplicationController
   end
 
   def company_stats
-    company = current_user.company
+    company = current_user.companies.first
     return { error: 'Company profile not found' } unless company
 
     {
