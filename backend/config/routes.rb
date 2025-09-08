@@ -31,6 +31,9 @@ Rails.application.routes.draw do
       
       # Job Postings
       resources :job_postings, only: [:index, :show, :create, :update, :destroy]
+      
+      # Dashboard
+      get 'dashboard/stats', to: 'dashboard#stats'
     end
   end
 
