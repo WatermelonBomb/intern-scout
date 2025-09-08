@@ -85,11 +85,34 @@ export interface JobPosting {
   requirements?: string;
   location?: string;
   salary_range?: string;
+  salary?: string;
   employment_type: string;
   deadline?: string;
+  application_deadline?: string;
   active: boolean;
   created_at: string;
   company: Company;
+  applications_count?: number;
+  pending_applications_count?: number;
+  has_applied?: boolean;
+  user_application?: Application;
+}
+
+export interface Application {
+  id: number;
+  cover_letter: string;
+  status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
+  applied_at: string;
+  reviewed_at?: string;
+  student: User;
+  job_posting: {
+    id: number;
+    title: string;
+    company: {
+      id: number;
+      name: string;
+    };
+  };
 }
 
 // Auth API
@@ -129,6 +152,16 @@ export const jobPostings = {
   create: (data: any) => api.post('/job_postings', data),
   update: (id: number, data: any) => api.put(`/job_postings/${id}`, data),
   delete: (id: number) => api.delete(`/job_postings/${id}`),
+};
+
+// Applications API
+export const applications = {
+  index: () => api.get('/applications'),
+  show: (id: number) => api.get(`/applications/${id}`),
+  create: (jobPostingId: number, data: { cover_letter: string }) => 
+    api.post(`/job_postings/${jobPostingId}/applications`, data),
+  update: (id: number, data: { status: string }) => api.put(`/applications/${id}`, data),
+  delete: (id: number) => api.delete(`/applications/${id}`),
 };
 
 // Dashboard API

@@ -13,6 +13,10 @@ interface DashboardStats {
   posted_jobs?: number;
   active_jobs?: number;
   sent_messages?: number;
+  total_applications?: number;
+  new_applications?: number;
+  reviewed_applications?: number;
+  accepted_applications?: number;
 }
 
 export default function DashboardPage() {
@@ -108,7 +112,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {user.user_type === 'student' ? (
               <>
                 <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -202,6 +206,38 @@ export default function DashboardPage() {
                         className="font-medium text-purple-600 hover:text-purple-500"
                       >
                         プロフィール編集
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-6">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">
+                            応募履歴
+                          </dt>
+                          <dd className="text-sm font-medium text-gray-900">
+                            応募状況を確認
+                          </dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-6 py-3">
+                    <div className="text-sm">
+                      <button
+                        onClick={() => router.push('/my-applications')}
+                        className="font-medium text-orange-600 hover:text-orange-500"
+                      >
+                        履歴を見る
                       </button>
                     </div>
                   </div>
@@ -300,6 +336,38 @@ export default function DashboardPage() {
                         className="font-medium text-purple-600 hover:text-purple-500"
                       >
                         履歴を見る
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-6">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">
+                            新着応募
+                          </dt>
+                          <dd className="text-lg font-medium text-gray-900">
+                            {statsLoading ? '...' : `${stats.new_applications || 0}件`}
+                          </dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-6 py-3">
+                    <div className="text-sm">
+                      <button
+                        onClick={() => router.push('/applications')}
+                        className="font-medium text-orange-600 hover:text-orange-500"
+                      >
+                        応募管理
                       </button>
                     </div>
                   </div>
