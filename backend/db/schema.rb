@@ -10,9 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_08_075335) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_08_182531) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "applications", force: :cascade do |t|
+    t.bigint "student_id", null: false
+    t.bigint "job_posting_id", null: false
+    t.text "cover_letter"
+    t.string "status", default: "pending"
+    t.datetime "applied_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "reviewed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_posting_id", "status"], name: "index_applications_on_job_posting_id_and_status"
+    t.index ["job_posting_id"], name: "index_applications_on_job_posting_id"
+    t.index ["student_id", "job_posting_id"], name: "index_applications_on_student_id_and_job_posting_id", unique: true
+    t.index ["student_id", "status"], name: "index_applications_on_student_id_and_status"
+    t.index ["student_id"], name: "index_applications_on_student_id"
+  end
 
   create_table "companies", force: :cascade do |t|
     t.string "name"
@@ -80,6 +96,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_075335) do
     t.index ["user_type"], name: "index_users_on_user_type"
   end
 
+  add_foreign_key "applications", "job_postings"
+  add_foreign_key "applications", "users", column: "student_id"
   add_foreign_key "companies", "users"
   add_foreign_key "conversations", "users", column: "user1_id"
   add_foreign_key "conversations", "users", column: "user2_id"

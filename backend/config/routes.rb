@@ -30,7 +30,12 @@ Rails.application.routes.draw do
       resources :conversations, only: [:index, :show, :create]
       
       # Job Postings
-      resources :job_postings, only: [:index, :show, :create, :update, :destroy]
+      resources :job_postings, only: [:index, :show, :create, :update, :destroy] do
+        resources :applications, only: [:create]
+      end
+      
+      # Applications
+      resources :applications, only: [:index, :show, :update, :destroy]
       
       # Dashboard
       get 'dashboard/stats', to: 'dashboard#stats'

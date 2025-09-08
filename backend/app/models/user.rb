@@ -10,6 +10,10 @@ class User < ApplicationRecord
   has_many :companies, dependent: :destroy
   has_many :job_postings, through: :companies
   
+  # Student applications
+  has_many :applications, foreign_key: 'student_id', dependent: :destroy
+  has_many :applied_job_postings, through: :applications, source: :job_posting
+  
   has_many :user1_conversations, class_name: 'Conversation', foreign_key: 'user1_id'
   has_many :user2_conversations, class_name: 'Conversation', foreign_key: 'user2_id'
 

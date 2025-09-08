@@ -26,11 +26,19 @@ class Api::V1::DashboardController < ApplicationController
     company = current_user.companies.first
     return { error: 'Company profile not found' } unless company
 
+    # Get applications for company's job postings
+    applications = Application.joins(job_posting: :company)
+                             .where(job_postings: { company: company })
+
     {
       posted_jobs: company.job_postings.count,
-      active_jobs: company.job_postings.count, # Since there's no active column, use total count
+      active_jobs: company.job_postings.active.count,
       sent_messages: current_user.sent_messages.count,
-      conversations: current_user.conversations.count
+      conversations: current_user.conversations.count,
+      total_applications: applications.count,
+      new_applications: applications.pending.count,
+      reviewed_applications: applications.reviewed.count,
+      accepted_applications: applications.accepted.count
     }
   end
 end
