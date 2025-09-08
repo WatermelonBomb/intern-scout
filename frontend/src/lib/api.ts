@@ -115,6 +115,27 @@ export interface Application {
   };
 }
 
+export interface Invitation {
+  id: number;
+  message: string;
+  status: 'sent' | 'accepted' | 'rejected' | 'expired';
+  sent_at: string;
+  responded_at?: string;
+  company: {
+    id: number;
+    name: string;
+  };
+  student: {
+    id: number;
+    name: string;
+  };
+  job_posting: {
+    id: number;
+    title: string;
+    employment_type: string;
+  };
+}
+
 // Auth API
 export const auth = {
   signup: (data: any) => api.post('/auth/signup', data),
@@ -162,6 +183,22 @@ export const applications = {
     api.post(`/job_postings/${jobPostingId}/applications`, data),
   update: (id: number, data: { status: string }) => api.put(`/applications/${id}`, data),
   delete: (id: number) => api.delete(`/applications/${id}`),
+};
+
+// Invitations API
+export const invitations = {
+  index: (sent?: boolean, status?: string) => {
+    const params = new URLSearchParams();
+    if (sent) params.append('sent', 'true');
+    if (status) params.append('status', status);
+    return api.get(`/invitations?${params.toString()}`);
+  },
+  show: (id: number) => api.get(`/invitations/${id}`),
+  create: (data: { student_id: number; job_posting_id: number; message: string }) => 
+    api.post('/invitations', { invitation: data }),
+  accept: (id: number) => api.patch(`/invitations/${id}/accept`),
+  reject: (id: number) => api.patch(`/invitations/${id}/reject`),
+  delete: (id: number) => api.delete(`/invitations/${id}`),
 };
 
 // Dashboard API

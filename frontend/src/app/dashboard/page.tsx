@@ -242,6 +242,38 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-6">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                        </svg>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">
+                            スカウト通知
+                          </dt>
+                          <dd className="text-sm font-medium text-gray-900">
+                            企業からのスカウト
+                          </dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-6 py-3">
+                    <div className="text-sm">
+                      <button
+                        onClick={() => router.push('/invitations')}
+                        className="font-medium text-yellow-600 hover:text-yellow-500"
+                      >
+                        スカウトを確認
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </>
             ) : (
               <>
@@ -272,6 +304,38 @@ export default function DashboardPage() {
                         className="font-medium text-blue-600 hover:text-blue-500"
                       >
                         検索開始
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                  <div className="p-6">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                        </svg>
+                      </div>
+                      <div className="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt className="text-sm font-medium text-gray-500 truncate">
+                            スカウト管理
+                          </dt>
+                          <dd className="text-sm font-medium text-gray-900">
+                            学生にスカウト送信
+                          </dd>
+                        </dl>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-6 py-3">
+                    <div className="text-sm">
+                      <button
+                        onClick={() => router.push('/scout-management')}
+                        className="font-medium text-yellow-600 hover:text-yellow-500"
+                      >
+                        スカウト管理
                       </button>
                     </div>
                   </div>
