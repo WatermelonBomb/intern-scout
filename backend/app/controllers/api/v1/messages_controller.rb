@@ -62,7 +62,7 @@ class Api::V1::MessagesController < ApplicationController
   end
 
   def message_params
-    params.permit(:subject, :content)
+    params.permit(:subject, :content, :receiver_id)
   end
   
   def message_response(message)

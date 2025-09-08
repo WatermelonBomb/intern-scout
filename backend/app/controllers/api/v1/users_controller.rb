@@ -62,7 +62,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.permit(:first_name, :last_name, :university, :graduation_year, :bio, :skills)
+    params.permit(:first_name, :last_name, :university, :graduation_year, :bio, :skills, :id)
   end
   
   def company_params

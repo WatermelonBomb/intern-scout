@@ -54,7 +54,8 @@ class Api::V1::AuthController < ApplicationController
 
   def user_params
     params.permit(:email, :password, :password_confirmation, :first_name, :last_name, 
-                  :user_type, :university, :graduation_year, :bio, :skills)
+                  :user_type, :university, :graduation_year, :bio, :skills,
+                  :company_name, :industry, :company_description, :website, :location)
   end
   
   def user_response(user)

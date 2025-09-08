@@ -18,7 +18,12 @@ class Api::V1::JobPostingsController < ApplicationController
       return
     end
     
-    job_posting = company.job_postings.build(job_posting_params)
+    # Map salary to salary_range and application_deadline to deadline
+    job_params = job_posting_params
+    job_params[:salary_range] = params[:salary] if params[:salary].present?
+    job_params[:deadline] = params[:application_deadline] if params[:application_deadline].present?
+    
+    job_posting = company.job_postings.build(job_params)
     
     if job_posting.save
       render json: job_posting_response(job_posting), status: :created
@@ -59,7 +64,7 @@ class Api::V1::JobPostingsController < ApplicationController
   end
 
   def job_posting_params
-    params.permit(:title, :description, :requirements, :location, :salary_range, :employment_type, :deadline)
+    params.permit(:title, :description, :requirements, :location, :salary_range, :employment_type, :deadline, :salary, :application_deadline)
   end
   
   def job_posting_response(job_posting)
