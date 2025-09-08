@@ -1,18 +1,49 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { dashboard } from '@/lib/api';
+
+interface DashboardStats {
+  received_messages?: number;
+  unread_messages?: number;
+  available_jobs?: number;
+  conversations?: number;
+  posted_jobs?: number;
+  active_jobs?: number;
+  sent_messages?: number;
+}
 
 export default function DashboardPage() {
   const { user, company, loading, logout } = useAuth();
   const router = useRouter();
+  const [stats, setStats] = useState<DashboardStats>({});
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) return;
+      
+      try {
+        setStatsLoading(true);
+        const response = await dashboard.stats();
+        setStats(response.data);
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -94,7 +125,7 @@ export default function DashboardPage() {
                             受信メッセージ
                           </dt>
                           <dd className="text-lg font-medium text-gray-900">
-                            3件
+                            {statsLoading ? '...' : `${stats.received_messages || 0}件`}
                           </dd>
                         </dl>
                       </div>
@@ -126,7 +157,7 @@ export default function DashboardPage() {
                             求人情報
                           </dt>
                           <dd className="text-lg font-medium text-gray-900">
-                            12件
+                            {statsLoading ? '...' : `${stats.available_jobs || 0}件`}
                           </dd>
                         </dl>
                       </div>
@@ -224,7 +255,7 @@ export default function DashboardPage() {
                             求人投稿
                           </dt>
                           <dd className="text-lg font-medium text-gray-900">
-                            2件
+                            {statsLoading ? '...' : `${stats.posted_jobs || 0}件`}
                           </dd>
                         </dl>
                       </div>
@@ -256,7 +287,7 @@ export default function DashboardPage() {
                             送信メッセージ
                           </dt>
                           <dd className="text-lg font-medium text-gray-900">
-                            7件
+                            {statsLoading ? '...' : `${stats.sent_messages || 0}件`}
                           </dd>
                         </dl>
                       </div>

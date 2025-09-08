@@ -131,4 +131,9 @@ export const jobPostings = {
   delete: (id: number) => api.delete(`/job_postings/${id}`),
 };
 
+// Dashboard API
+export const dashboard = {
+  stats: () => api.get('/dashboard/stats'),
+};
+
 export default api;
