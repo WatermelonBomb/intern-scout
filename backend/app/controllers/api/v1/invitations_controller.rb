@@ -1,5 +1,4 @@
 class Api::V1::InvitationsController < ApplicationController
-  before_action :authenticate_user!
   before_action :set_invitation, only: [:show, :update, :destroy, :accept, :reject]
 
   # GET /api/v1/invitations - 受信したスカウト一覧（学生用）
