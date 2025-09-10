@@ -236,7 +236,11 @@ export default function JobPostingsPage() {
       <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <style>{spinnerStyles}</style>
         {/* Navigation */}
-        <nav style={{ backgroundColor: 'white', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' }}>
+        <nav style={{ 
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', 
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+          borderBottom: '1px solid #e5e7eb'
+        }}>
           <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', height: '4rem' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -278,30 +282,93 @@ export default function JobPostingsPage() {
 
         <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '1.5rem 1rem' }}>
           <div style={{ padding: '1.5rem 0' }}>
-            <div style={{ marginBottom: '2rem' }}>
-              <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#111827' }}>
-                求人情報
-              </h1>
-              <p style={{ marginTop: '0.5rem', color: '#4b5563' }}>
-                インターンシップの求人情報を確認できます
-              </p>
+            <div style={{ 
+              marginBottom: '2.5rem',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              borderRadius: '1rem',
+              padding: '2rem',
+              color: 'white',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-50px',
+                right: '-50px',
+                width: '150px',
+                height: '150px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '50%'
+              }}></div>
+              <div style={{
+                position: 'absolute',
+                bottom: '-30px',
+                left: '-30px',
+                width: '100px',
+                height: '100px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '50%'
+              }}></div>
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '0.75rem',
+                    borderRadius: '0.75rem'
+                  }}>
+                    <svg style={{ width: '1.75rem', height: '1.75rem' }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zM8 5a1 1 0 011-1h2a1 1 0 011 1v1H8V5zM8 8a1 1 0 00-1 1v.01A1 1 0 008 10h4a1 1 0 001-1V9a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h1 style={{ fontSize: '2.25rem', fontWeight: '800', margin: '0', textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+                      求人情報
+                    </h1>
+                  </div>
+                </div>
+                <p style={{ fontSize: '1rem', opacity: '0.9', lineHeight: '1.6', margin: '0' }}>
+                  あなたにぴったりのインターンシップを探して、キャリアをスタートさせましょう。ここでは最新の求人情報を確認できます。
+                </p>
+              </div>
             </div>
 
             {/* Job Listings for Students */}
             <div style={{ 
               backgroundColor: 'white', 
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)', 
-              borderRadius: '0.5rem' 
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)', 
+              borderRadius: '1rem',
+              border: '1px solid #e5e7eb'
             }}>
               <div style={{ 
-                padding: '1rem 1.5rem', 
-                borderBottom: '1px solid #e5e7eb' 
+                padding: '1.5rem 2rem', 
+                borderBottom: '1px solid #e5e7eb',
+                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
               }}>
-                <h2 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#111827' }}>
-                  募集中の求人 ({jobList.length}件)
-                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                    width: '2.5rem',
+                    height: '2.5rem',
+                    borderRadius: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.375rem', fontWeight: '700', color: '#111827', margin: '0' }}>
+                      募集中の求人
+                    </h2>
+                    <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>
+                      {jobList.length}件の求人が見つかりました
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div style={{ padding: '1.5rem' }}>
+              <div style={{ padding: '2rem' }}>
                 {jobsLoading ? (
                   <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
                     <div style={{ 
@@ -313,17 +380,27 @@ export default function JobPostingsPage() {
                     }}></div>
                   </div>
                 ) : jobList.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-                    <svg style={{ 
-                      margin: '0 auto', 
-                      height: '3rem', 
-                      width: '3rem', 
-                      color: '#9ca3af' 
-                    }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
-                    </svg>
-                    <h3 style={{ marginTop: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#111827' }}>求人情報がありません</h3>
-                    <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#6b7280' }}>新しい求人が投稿されるまでお待ちください</p>
+                  <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                      borderRadius: '50%',
+                      width: '5rem',
+                      height: '5rem',
+                      margin: '0 auto 1.5rem auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <svg style={{ 
+                        height: '2.5rem', 
+                        width: '2.5rem', 
+                        color: '#9ca3af' 
+                      }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
+                      </svg>
+                    </div>
+                    <h3 style={{ marginBottom: '0.5rem', fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>求人情報がありません</h3>
+                    <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: '1.5' }}>新しい求人が投稿されるまでお待ちください。<br/>パーフェクトな機会が見つかるかもしれません。</p>
                   </div>
                 ) : (
                   <div style={{ 
@@ -344,7 +421,31 @@ export default function JobPostingsPage() {
                           }
                         }
                         .job-card:hover {
-                          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                          transform: translateY(-2px);
+                          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+                          border-color: #3b82f6;
+                        }
+                        .job-tag {
+                          display: inline-flex;
+                          align-items: center;
+                          padding: 0.25rem 0.75rem;
+                          background: linear-gradient(135deg, #3b82f6, #2563eb);
+                          color: white;
+                          font-size: 0.75rem;
+                          font-weight: 500;
+                          border-radius: 1rem;
+                          margin-bottom: 1rem;
+                        }
+                        .company-badge {
+                          background: linear-gradient(135deg, #f59e0b, #d97706);
+                          color: white;
+                          padding: 0.125rem 0.5rem;
+                          border-radius: 0.5rem;
+                          font-size: 0.75rem;
+                          font-weight: 500;
+                          display: inline-flex;
+                          align-items: center;
+                          gap: 0.25rem;
                         }
                       `}
                     </style>
@@ -356,75 +457,131 @@ export default function JobPostingsPage() {
                     {jobList.map((job) => (
                       <div key={job.id} className="job-card" style={{ 
                         border: '1px solid #e5e7eb', 
-                        borderRadius: '0.5rem', 
-                        padding: '1.5rem',
-                        transition: 'box-shadow 0.15s ease-in-out'
+                        borderRadius: '0.75rem', 
+                        padding: '1.75rem',
+                        transition: 'all 0.2s ease-in-out',
+                        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
                       }}>
                         <div style={{ marginBottom: '1rem' }}>
-                          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.5rem' }}>
+                          <div className="job-tag">
+                            <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zM8 5a1 1 0 011-1h2a1 1 0 011 1v1H8V5zM8 8a1 1 0 00-1 1v.01A1 1 0 008 10h4a1 1 0 001-1V9a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                            </svg>
+                            {job.employment_type === 'internship' ? 'インターン' : 
+                             job.employment_type === 'part_time' ? 'パート' : 
+                             job.employment_type === 'full_time' ? 'フルタイム' : 
+                             job.employment_type === 'contract' ? '契約' : 'その他'}
+                          </div>
+                          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#111827', marginBottom: '0.75rem', lineHeight: '1.4' }}>
                             {job.title}
                           </h3>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem', color: '#4b5563' }}>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                              </svg>
-                              {job.company?.name || '企業名未設定'}
-                            </div>
+                          <div className="company-badge" style={{ marginBottom: '1rem' }}>
+                            <svg style={{ width: '0.875rem', height: '0.875rem' }} fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+                            </svg>
+                            {job.company?.name || '企業名未設定'}
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem', color: '#4b5563' }}>
                             {job.location && (
-                              <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid #a7f3d0'
+                              }}>
+                                <svg style={{ width: '1.125rem', height: '1.125rem', marginRight: '0.5rem', color: '#059669' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                {job.location}
+                                <span style={{ color: '#065f46', fontWeight: '500' }}>{job.location}</span>
                               </div>
                             )}
                             {job.salary && (
-                              <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid #fcd34d'
+                              }}>
+                                <svg style={{ width: '1.125rem', height: '1.125rem', marginRight: '0.5rem', color: '#d97706' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                 </svg>
-                                {job.salary}
+                                <span style={{ color: '#92400e', fontWeight: '500' }}>{job.salary}</span>
                               </div>
                             )}
                           </div>
                         </div>
                         
-                        <p style={{ 
-                          color: '#374151', 
-                          fontSize: '0.875rem', 
-                          marginBottom: '1rem',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
+                        <div style={{
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '0.5rem',
+                          padding: '1rem',
+                          marginBottom: '1.25rem'
                         }}>
-                          {job.description}
-                        </p>
+                          <p style={{ 
+                            color: '#374151', 
+                            fontSize: '0.875rem', 
+                            lineHeight: '1.6',
+                            margin: '0',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                          }}>
+                            {job.description}
+                          </p>
+                        </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             {job.application_deadline && (
-                              <div style={{ color: isDeadlinePassed(job.application_deadline) ? '#ef4444' : '#6b7280' }}>
-                                締切: {formatDate(job.application_deadline)}
+                              <div style={{ 
+                                padding: '0.375rem 0.75rem',
+                                borderRadius: '0.5rem',
+                                fontSize: '0.75rem',
+                                fontWeight: '500',
+                                background: isDeadlinePassed(job.application_deadline) ? 'linear-gradient(135deg, #fee2e2, #fecaca)' : 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+                                color: isDeadlinePassed(job.application_deadline) ? '#991b1b' : '#1e40af',
+                                border: isDeadlinePassed(job.application_deadline) ? '1px solid #fca5a5' : '1px solid #93c5fd',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem'
+                              }}>
+                                <svg style={{ width: '0.875rem', height: '0.875rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {isDeadlinePassed(job.application_deadline) ? '締切済み' : `締切: ${formatDate(job.application_deadline)}`}
                               </div>
                             )}
                           </div>
                           <button
                             onClick={() => openJobDetail(job)}
                             style={{ 
-                              padding: '0.5rem 1rem', 
-                              backgroundColor: '#2563eb', 
+                              padding: '0.75rem 1.5rem', 
+                              background: 'linear-gradient(135deg, #3b82f6, #2563eb)', 
                               color: 'white', 
                               fontSize: '0.875rem', 
-                              borderRadius: '0.5rem',
+                              fontWeight: '600',
+                              borderRadius: '0.75rem',
                               border: 'none',
                               cursor: 'pointer',
-                              transition: 'background-color 0.15s ease-in-out'
+                              transition: 'all 0.2s ease-in-out',
+                              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)'
                             }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = '#1d4ed8'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = '#2563eb'}
+                            onMouseEnter={(e) => {
+                              e.target.style.transform = 'translateY(-1px)';
+                              e.target.style.boxShadow = '0 6px 20px rgba(37, 99, 235, 0.35)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.transform = 'translateY(0)';
+                              e.target.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.25)';
+                            }}
                           >
                             詳細を見る
                           </button>
