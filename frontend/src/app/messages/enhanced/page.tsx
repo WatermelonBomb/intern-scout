@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { conversations, messages, Conversation, Message } from '@/lib/api';
 
 export default function EnhancedMessagesPage() {
   const { user, loading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
   
   const [conversationList, setConversationList] = useState<Conversation[]>([]);
@@ -132,7 +134,7 @@ export default function EnhancedMessagesPage() {
       
     } catch (error: any) {
       const errorMessage = error.response?.data?.errors?.[0] || 'メッセージの送信に失敗しました';
-      alert(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setSendingReply(false);
     }

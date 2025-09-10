@@ -199,6 +199,45 @@ export const invitations = {
   accept: (id: number) => api.patch(`/invitations/${id}/accept`),
   reject: (id: number) => api.patch(`/invitations/${id}/reject`),
   delete: (id: number) => api.delete(`/invitations/${id}`),
+  bulkCreate: (data: { student_ids: number[]; job_posting_id: number; message: string; scout_template_id?: number }) => 
+    api.post('/invitations/bulk_create', data),
+};
+
+// Students API (for company search)
+export const students = {
+  index: (filters?: {
+    major?: string;
+    preferred_location?: string;
+    experience_level?: string;
+    graduation_year?: number;
+    programming_language?: string;
+    skills?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          params.append(key, value.toString());
+        }
+      });
+    }
+    return api.get(`/students?${params.toString()}`);
+  },
+  filterOptions: () => api.get('/students/filter_options'),
+};
+
+// Scout Templates API
+export const scoutTemplates = {
+  index: () => api.get('/scout_templates'),
+  show: (id: number) => api.get(`/scout_templates/${id}`),
+  create: (data: { name: string; subject: string; message: string }) => 
+    api.post('/scout_templates', { scout_template: data }),
+  update: (id: number, data: { name?: string; subject?: string; message?: string; is_active?: boolean }) => 
+    api.patch(`/scout_templates/${id}`, { scout_template: data }),
+  delete: (id: number) => api.delete(`/scout_templates/${id}`),
+  clone: (id: number) => api.post(`/scout_templates/${id}/clone`),
 };
 
 // Dashboard API

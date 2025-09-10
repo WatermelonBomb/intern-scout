@@ -39,9 +39,26 @@ Rails.application.routes.draw do
       
       # Invitations (scouting)
       resources :invitations, only: [:index, :show, :create, :destroy] do
+        collection do
+          post :bulk_create
+        end
         member do
           patch :accept
           patch :reject
+        end
+      end
+      
+      # Students (for company search)
+      resources :students, only: [:index] do
+        collection do
+          get :filter_options
+        end
+      end
+      
+      # Scout Templates
+      resources :scout_templates do
+        member do
+          post :clone
         end
       end
       

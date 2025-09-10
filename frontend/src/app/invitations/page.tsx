@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { invitations, Invitation } from '@/lib/api';
 
 export default function InvitationsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { showToast } = useToast();
   
   const [invitationsList, setInvitationsList] = useState<Invitation[]>([]);
   const [invitationsLoading, setInvitationsLoading] = useState(false);
@@ -58,12 +60,12 @@ export default function InvitationsPage() {
     setResponding(invitationId);
     try {
       await invitations.accept(invitationId);
-      alert('スカウトを承諾しました。メッセージ機能でやり取りを開始してください。');
+      showToast('スカウトを承諾しました。メッセージ機能でやり取りを開始してください。', 'success');
       await loadInvitations();
       closeDetailModal();
     } catch (error: any) {
       const errorMessage = error.response?.data?.errors?.[0] || 'スカウトの承諾に失敗しました';
-      alert(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setResponding(null);
     }
@@ -77,12 +79,12 @@ export default function InvitationsPage() {
     setResponding(invitationId);
     try {
       await invitations.reject(invitationId);
-      alert('スカウトを辞退しました。');
+      showToast('スカウトを辞退しました。', 'success');
       await loadInvitations();
       closeDetailModal();
     } catch (error: any) {
       const errorMessage = error.response?.data?.errors?.[0] || 'スカウトの辞退に失敗しました';
-      alert(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setResponding(null);
     }

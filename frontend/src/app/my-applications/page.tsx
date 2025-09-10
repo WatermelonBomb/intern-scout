@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { applications, Application } from '@/lib/api';
 
 export default function MyApplicationsPage() {
   const { user, loading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
   
   const [applicationsList, setApplicationsList] = useState<Application[]>([]);
@@ -61,7 +63,7 @@ export default function MyApplicationsPage() {
       await loadApplications();
     } catch (error: any) {
       const errorMessage = error.response?.data?.errors?.[0] || '応募の取り下げに失敗しました';
-      alert(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setWithdrawing(null);
     }

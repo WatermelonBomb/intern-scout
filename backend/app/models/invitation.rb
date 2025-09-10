@@ -2,6 +2,7 @@ class Invitation < ApplicationRecord
   belongs_to :company, class_name: 'User'
   belongs_to :student, class_name: 'User'
   belongs_to :job_posting
+  belongs_to :scout_template, optional: true
 
   validates :message, presence: true
   validates :status, inclusion: { in: %w[sent accepted rejected expired] }
@@ -20,6 +21,9 @@ class Invitation < ApplicationRecord
   scope :expired, -> { where(status: 'expired') }
   scope :recent, -> { order(sent_at: :desc) }
   scope :pending, -> { where(status: 'sent') }
+  scope :bulk_sent, -> { where(is_bulk_sent: true) }
+  scope :individual_sent, -> { where(is_bulk_sent: false) }
+  scope :by_campaign, ->(campaign_id) { where(campaign_id: campaign_id) }
 
   # Auto-expire invitations after 30 days
   scope :expired_invitations, -> { where(status: 'sent').where('sent_at < ?', 30.days.ago) }
@@ -57,6 +61,44 @@ class Invitation < ApplicationRecord
 
   def self.expire_old_invitations!
     expired_invitations.update_all(status: 'expired')
+  end
+  
+  # 一括スカウト送信用のクラスメソッド
+  def self.bulk_scout_students(company:, students:, job_posting:, message:, scout_template: nil)
+    campaign_id = SecureRandom.uuid
+    
+    transaction do
+      invitations = []
+      
+      students.each do |student|
+        # 既に同じ学生・求人の組み合わせでスカウトが存在しないかチェック
+        next if exists?(company_id: company.id, student_id: student.id, job_posting_id: job_posting.id)
+        
+        invitation = new(
+          company: company,
+          student: student,
+          job_posting: job_posting,
+          message: message,
+          scout_template: scout_template,
+          campaign_id: campaign_id,
+          is_bulk_sent: true,
+          sent_at: Time.current
+        )
+        
+        if invitation.valid?
+          invitations << invitation
+        end
+      end
+      
+      # バルクインサート
+      Invitation.import(invitations, validate: false) if invitations.any?
+      
+      {
+        campaign_id: campaign_id,
+        sent_count: invitations.count,
+        total_students: students.count
+      }
+    end
   end
 
   private
