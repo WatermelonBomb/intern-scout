@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { users } from '@/lib/api';
+import { getErrorMessage, validateEmail, validateRequired } from '@/lib/errorHandler';
 
 export default function ProfilePage() {
   const { user, company, loading } = useAuth();
@@ -122,8 +123,8 @@ export default function ProfilePage() {
       }
 
     } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || error.response?.data?.errors || '更新に失敗しました';
-      setMessage({ type: 'error', text: Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage });
+      const errorMessage = getErrorMessage(error, 'プロフィールの更新に失敗しました');
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setSaving(false);
     }
@@ -131,8 +132,25 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh'
+      }}>
+        <div style={{
+          animation: 'spin 1s linear infinite',
+          borderRadius: '50%',
+          height: '32px',
+          width: '32px',
+          borderBottom: '2px solid #2563eb'
+        }}></div>
+        <style jsx>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
@@ -140,23 +158,74 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f9fafb'
+    }}>
       {/* Navigation */}
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">IS</span>
+      <nav style={{
+        backgroundColor: '#ffffff',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+      }}>
+        <div style={{
+          maxWidth: '80rem',
+          margin: '0 auto',
+          padding: '0 1rem'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            height: '64px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: '#2563eb',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <span style={{
+                    color: '#ffffff',
+                    fontWeight: 'bold',
+                    fontSize: '18px'
+                  }}>IS</span>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">InternScout</h1>
+                <h1 style={{
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  color: '#111827'
+                }}>InternScout</h1>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem'
+            }}>
               <button
                 onClick={() => router.push('/dashboard')}
-                className="text-gray-600 hover:text-gray-900 font-medium"
+                style={{
+                  color: '#4b5563',
+                  fontWeight: '500',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s ease',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.target.style.color = '#111827'}
+                onMouseLeave={(e) => e.target.style.color = '#4b5563'}
               >
                 ダッシュボード
               </button>
@@ -165,37 +234,71 @@ export default function ProfilePage() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
+      <div style={{
+        maxWidth: '56rem',
+        margin: '0 auto',
+        padding: '1.5rem 1rem'
+      }}>
+        <div style={{
+          padding: '1.5rem 1rem 1.5rem 0'
+        }}>
+          <div style={{
+            marginBottom: '2rem'
+          }}>
+            <h1 style={{
+              fontSize: '30px',
+              fontWeight: 'bold',
+              color: '#111827'
+            }}>
               プロフィール設定
             </h1>
-            <p className="mt-2 text-gray-600">
+            <p style={{
+              marginTop: '0.5rem',
+              color: '#4b5563'
+            }}>
               あなたの情報を管理しましょう
             </p>
           </div>
 
           {message && (
-            <div className={`mb-6 rounded-md p-4 ${
-              message.type === 'success' ? 'bg-green-50' : 'bg-red-50'
-            }`}>
-              <div className="flex">
-                <div className="flex-shrink-0">
+            <div style={{
+              marginBottom: '1.5rem',
+              borderRadius: '6px',
+              padding: '1rem',
+              backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2'
+            }}>
+              <div style={{
+                display: 'flex'
+              }}>
+                <div style={{
+                  flexShrink: 0
+                }}>
                   {message.type === 'success' ? (
-                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg style={{
+                      height: '20px',
+                      width: '20px',
+                      color: '#4ade80'
+                    }} viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   ) : (
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg style={{
+                      height: '20px',
+                      width: '20px',
+                      color: '#f87171'
+                    }} viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                   )}
                 </div>
-                <div className="ml-3">
-                  <h3 className={`text-sm font-medium ${
-                    message.type === 'success' ? 'text-green-800' : 'text-red-800'
-                  }`}>
+                <div style={{
+                  marginLeft: '0.75rem'
+                }}>
+                  <h3 style={{
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: message.type === 'success' ? '#166534' : '#991b1b'
+                  }}>
                     {message.text}
                   </h3>
                 </div>
@@ -203,33 +306,97 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <div className="bg-white shadow rounded-lg">
-            <form onSubmit={handleSubmit} className="space-y-6 p-6">
+          <div style={{
+            backgroundColor: '#ffffff',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            borderRadius: '8px'
+          }}>
+            <form onSubmit={handleSubmit} style={{
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem'
+            }}>
               {/* Basic Information */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">基本情報</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  color: '#111827',
+                  marginBottom: '1rem'
+                }}>基本情報</h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                  gap: '1.5rem'
+                }}>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">姓 *</label>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>姓 *</label>
                     <input
                       name="last_name"
                       type="text"
                       required
                       value={formData.last_name}
                       onChange={handleInputChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                       placeholder="田中"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">名 *</label>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>名 *</label>
                     <input
                       name="first_name"
                       type="text"
                       required
                       value={formData.first_name}
                       onChange={handleInputChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                       placeholder="太郎"
                     />
                   </div>
@@ -239,27 +406,82 @@ export default function ProfilePage() {
               {/* Student-specific fields */}
               {user.user_type === 'student' && (
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">学生情報</h3>
-                  <div className="space-y-6">
+                  <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  color: '#111827',
+                  marginBottom: '1rem'
+                }}>学生情報</h3>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem'
+                  }}>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">大学名</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>大学名</label>
                       <input
                         name="university"
                         type="text"
                         value={formData.university}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="東京大学"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">卒業予定年</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>卒業予定年</label>
                       <select
                         name="graduation_year"
                         value={formData.graduation_year}
                         onChange={(e) => handleInputChange(e as any)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                       >
                         <option value="">選択してください</option>
                         <option value="2024">2024年</option>
@@ -271,28 +493,78 @@ export default function ProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">スキル</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>スキル</label>
                       <input
                         name="skills"
                         type="text"
                         value={formData.skills}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="JavaScript, React, Python（カンマ区切り）"
                       />
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p style={{
+                        marginTop: '0.25rem',
+                        fontSize: '14px',
+                        color: '#6b7280'
+                      }}>
                         複数のスキルはカンマで区切って入力してください
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">自己紹介</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>自己紹介</label>
                       <textarea
                         name="bio"
                         rows={4}
                         value={formData.bio}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="あなたの経験や興味、目標について教えてください"
                       />
                     </div>
@@ -303,66 +575,190 @@ export default function ProfilePage() {
               {/* Company-specific fields */}
               {user.user_type === 'company' && (
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">会社情報</h3>
-                  <div className="space-y-6">
+                  <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  color: '#111827',
+                  marginBottom: '1rem'
+                }}>会社情報</h3>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem'
+                  }}>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">会社名 *</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>会社名 *</label>
                       <input
                         name="name"
                         type="text"
                         required
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="株式会社サンプル"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">業界 *</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>業界 *</label>
                       <input
                         name="industry"
                         type="text"
                         required
                         value={formData.industry}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="IT・ソフトウェア"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">所在地</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>所在地</label>
                       <input
                         name="location"
                         type="text"
                         value={formData.location}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="東京都渋谷区"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">ウェブサイト</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>ウェブサイト</label>
                       <input
                         name="website"
                         type="url"
                         value={formData.website}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="https://example.com"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">会社紹介</label>
+                      <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>会社紹介</label>
                       <textarea
                         name="description"
                         rows={4}
                         value={formData.description}
                         onChange={handleInputChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        style={{
+                        marginTop: '0.25rem',
+                        display: 'block',
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.outline = 'none';
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
                         placeholder="会社の事業内容、文化、ビジョンについて教えてください"
                       />
                     </div>
@@ -371,38 +767,131 @@ export default function ProfilePage() {
               )}
 
               {/* Account Information */}
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">アカウント情報</h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
+              <div style={{
+                borderTop: '1px solid #e5e7eb',
+                paddingTop: '1.5rem'
+              }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  color: '#111827',
+                  marginBottom: '1rem'
+                }}>アカウント情報</h3>
+                <div style={{
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '8px',
+                  padding: '1rem'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem'
+                  }}>
                     <div>
-                      <span className="text-sm font-medium text-gray-900">メールアドレス:</span>
-                      <span className="ml-2 text-sm text-gray-600">{user.email}</span>
+                      <span style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#111827'
+                      }}>メールアドレス:</span>
+                      <span style={{
+                        marginLeft: '0.5rem',
+                        fontSize: '14px',
+                        color: '#4b5563'
+                      }}>{user.email}</span>
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p style={{
+                    marginTop: '0.5rem',
+                    fontSize: '14px',
+                    color: '#6b7280'
+                  }}>
                     メールアドレスの変更が必要な場合は、サポートまでお問い合わせください。
                   </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '1rem',
+                paddingTop: '1.5rem',
+                borderTop: '1px solid #e5e7eb'
+              }}>
                 <button
                   type="button"
                   onClick={() => router.push('/dashboard')}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    color: '#374151',
+                    backgroundColor: '#ffffff',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease, border-color 0.2s ease',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#f9fafb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#ffffff';
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.outline = 'none';
+                    e.target.style.borderColor = '#2563eb';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#d1d5db';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 >
                   キャンセル
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: saving ? '#9ca3af' : '#2563eb',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    opacity: saving ? 0.5 : 1,
+                    transition: 'background-color 0.2s ease',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!saving) e.target.style.backgroundColor = '#1d4ed8';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!saving) e.target.style.backgroundColor = '#2563eb';
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.outline = 'none';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.boxShadow = 'none';
+                  }}
                 >
                   {saving ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{
+                        animation: 'spin 1s linear infinite',
+                        borderRadius: '50%',
+                        height: '16px',
+                        width: '16px',
+                        borderBottom: '2px solid #ffffff',
+                        marginRight: '0.5rem'
+                      }}></div>
                       保存中...
                     </div>
                   ) : (

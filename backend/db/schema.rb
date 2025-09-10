@@ -10,9 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_08_075335) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_09_084403) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "applications", force: :cascade do |t|
+    t.bigint "student_id", null: false
+    t.bigint "job_posting_id", null: false
+    t.text "cover_letter"
+    t.string "status", default: "pending"
+    t.datetime "applied_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "reviewed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_posting_id", "status"], name: "index_applications_on_job_posting_id_and_status"
+    t.index ["job_posting_id"], name: "index_applications_on_job_posting_id"
+    t.index ["student_id", "job_posting_id"], name: "index_applications_on_student_id_and_job_posting_id", unique: true
+    t.index ["student_id", "status"], name: "index_applications_on_student_id_and_status"
+    t.index ["student_id"], name: "index_applications_on_student_id"
+  end
 
   create_table "companies", force: :cascade do |t|
     t.string "name"
@@ -34,6 +50,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_075335) do
     t.datetime "updated_at", null: false
     t.index ["user1_id", "user2_id"], name: "index_conversations_on_user1_id_and_user2_id", unique: true
     t.index ["user2_id", "user1_id"], name: "index_conversations_on_user2_id_and_user1_id", unique: true
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "student_id", null: false
+    t.bigint "job_posting_id", null: false
+    t.text "message"
+    t.string "status", default: "sent"
+    t.datetime "sent_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "responded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "scout_template_id"
+    t.string "campaign_id"
+    t.boolean "is_bulk_sent", default: false
+    t.index ["campaign_id"], name: "index_invitations_on_campaign_id"
+    t.index ["company_id", "status"], name: "index_invitations_on_company_id_and_status"
+    t.index ["company_id", "student_id", "job_posting_id"], name: "index_invitations_unique", unique: true
+    t.index ["company_id"], name: "index_invitations_on_company_id"
+    t.index ["job_posting_id"], name: "index_invitations_on_job_posting_id"
+    t.index ["scout_template_id"], name: "index_invitations_on_scout_template_id"
+    t.index ["student_id", "status"], name: "index_invitations_on_student_id_and_status"
+    t.index ["student_id"], name: "index_invitations_on_student_id"
   end
 
   create_table "job_postings", force: :cascade do |t|
@@ -64,6 +103,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_075335) do
     t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
 
+  create_table "scout_templates", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.string "name", null: false
+    t.string "subject"
+    t.text "message", null: false
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_scout_templates_on_company_id"
+  end
+
+  create_table "selection_processes", force: :cascade do |t|
+    t.bigint "application_id", null: false
+    t.string "process_type", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.text "url"
+    t.datetime "due_date"
+    t.datetime "completed_at"
+    t.string "status", default: "assigned"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["application_id", "process_type"], name: "index_selection_processes_on_application_id_and_process_type"
+    t.index ["application_id", "status"], name: "index_selection_processes_on_application_id_and_status"
+    t.index ["application_id"], name: "index_selection_processes_on_application_id"
+    t.index ["due_date"], name: "index_selection_processes_on_due_date"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "password_digest", null: false
@@ -76,15 +143,32 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_08_075335) do
     t.text "skills"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "major"
+    t.string "preferred_location"
+    t.text "programming_languages"
+    t.string "experience_level"
+    t.string "job_search_status", default: "active"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["experience_level"], name: "index_users_on_experience_level"
+    t.index ["job_search_status"], name: "index_users_on_job_search_status"
+    t.index ["major"], name: "index_users_on_major"
+    t.index ["preferred_location"], name: "index_users_on_preferred_location"
     t.index ["user_type"], name: "index_users_on_user_type"
   end
 
+  add_foreign_key "applications", "job_postings"
+  add_foreign_key "applications", "users", column: "student_id"
   add_foreign_key "companies", "users"
   add_foreign_key "conversations", "users", column: "user1_id"
   add_foreign_key "conversations", "users", column: "user2_id"
+  add_foreign_key "invitations", "job_postings"
+  add_foreign_key "invitations", "scout_templates"
+  add_foreign_key "invitations", "users", column: "company_id"
+  add_foreign_key "invitations", "users", column: "student_id"
   add_foreign_key "job_postings", "companies"
   add_foreign_key "messages", "conversations"
   add_foreign_key "messages", "users", column: "receiver_id"
   add_foreign_key "messages", "users", column: "sender_id"
+  add_foreign_key "scout_templates", "companies"
+  add_foreign_key "selection_processes", "applications"
 end

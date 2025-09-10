@@ -30,7 +30,48 @@ Rails.application.routes.draw do
       resources :conversations, only: [:index, :show, :create]
       
       # Job Postings
-      resources :job_postings, only: [:index, :show, :create, :update, :destroy]
+      resources :job_postings, only: [:index, :show, :create, :update, :destroy] do
+        resources :applications, only: [:create]
+      end
+      
+      # Applications
+      resources :applications, only: [:index, :show, :update, :destroy]
+      
+      # Invitations (scouting)
+      resources :invitations, only: [:index, :show, :create, :destroy] do
+        collection do
+          post :bulk_create
+        end
+        member do
+          patch :accept
+          patch :reject
+        end
+      end
+      
+      # Students (for company search)
+      resources :students, only: [:index] do
+        collection do
+          get :filter_options
+        end
+      end
+      
+      # Scout Templates
+      resources :scout_templates do
+        member do
+          post :clone
+        end
+      end
+      
+      # Selection Processes
+      resources :selection_processes, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          patch :start
+          patch :complete
+        end
+      end
+      
+      # Dashboard
+      get 'dashboard/stats', to: 'dashboard#stats'
     end
   end
 

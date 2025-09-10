@@ -34,6 +34,11 @@ class Api::V1::UsersController < ApplicationController
 
   def update
     if @user == current_user
+      # Handle programming_languages array conversion
+      if params[:programming_languages].is_a?(Array)
+        @user.programming_languages_array = params[:programming_languages]
+      end
+      
       if @user.update(user_params)
         # Update company if user is a company
         if @user.company? && company_params.present?
@@ -62,7 +67,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.permit(:first_name, :last_name, :university, :graduation_year, :bio, :skills, :id)
+    params.permit(:first_name, :last_name, :university, :graduation_year, :bio, :skills, :major, :preferred_location, :experience_level, :job_search_status, :id, programming_languages: [])
   end
   
   def company_params
@@ -80,7 +85,12 @@ class Api::V1::UsersController < ApplicationController
       university: user.university,
       graduation_year: user.graduation_year,
       bio: user.bio,
-      skills: user.skills
+      skills: user.skills,
+      major: user.major,
+      preferred_location: user.preferred_location,
+      experience_level: user.experience_level,
+      job_search_status: user.job_search_status,
+      programming_languages: user.programming_languages_array
     }
   end
   

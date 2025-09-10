@@ -17,125 +17,368 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+        <div style={{ 
+          width: '32px', 
+          height: '32px', 
+          border: '2px solid #e5e7eb', 
+          borderTop: '2px solid #2563eb', 
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <header className="py-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">IS</span>
+    <div style={{ minHeight: '100vh', backgroundColor: 'white', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      {/* Header */}
+      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ 
+                width: '40px', 
+                height: '40px', 
+                backgroundColor: '#2563eb', 
+                borderRadius: '8px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+              }}>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>IS</span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">InternScout</h1>
+              <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>InternScout</span>
             </div>
-            <nav className="flex items-center space-x-4">
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <Link
                 href="/login"
-                className="text-gray-600 hover:text-gray-900 font-medium"
+                style={{ 
+                  color: '#4b5563', 
+                  fontWeight: '500', 
+                  padding: '8px 12px', 
+                  textDecoration: 'none',
+                  borderRadius: '6px',
+                  transition: 'color 0.2s'
+                }}
               >
                 ログイン
               </Link>
               <Link
                 href="/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                style={{ 
+                  backgroundColor: '#2563eb', 
+                  color: 'white', 
+                  padding: '8px 24px', 
+                  borderRadius: '8px', 
+                  fontWeight: '500', 
+                  textDecoration: 'none',
+                  transition: 'background-color 0.2s'
+                }}
               >
                 新規登録
               </Link>
             </nav>
           </div>
-        </header>
+        </div>
+      </header>
 
+      {/* Main Content */}
+      <main>
         {/* Hero Section */}
-        <main className="py-20">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              インターン生と企業を
-              <br />
-              <span className="text-blue-600">つなぐ</span>プラットフォーム
-            </h1>
-            <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-              InternScoutは、優秀なインターン生と成長企業をマッチングする新しいスカウトサービスです。
-              あなたのキャリアの次のステップを見つけませんか？
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/signup?type=student"
-                className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                学生として登録
-              </Link>
-              <Link
-                href="/signup?type=company"
-                className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg text-lg font-medium hover:bg-blue-50 transition-colors"
-              >
-                企業として登録
-              </Link>
+        <section style={{ 
+          background: 'linear-gradient(to bottom, #eff6ff, white)', 
+          padding: '80px 0' 
+        }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <h1 style={{ 
+                fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
+                fontWeight: 'bold', 
+                color: '#111827', 
+                marginBottom: '24px',
+                lineHeight: '1.2'
+              }}>
+                インターン生と企業を
+                <br />
+                <span style={{ color: '#2563eb' }}>つなぐ</span>
+                プラットフォーム
+              </h1>
+              <p style={{ 
+                fontSize: '20px', 
+                color: '#4b5563', 
+                marginBottom: '40px', 
+                maxWidth: '768px', 
+                margin: '0 auto 40px auto',
+                lineHeight: '1.6'
+              }}>
+                InternScoutは、優秀なインターン生と成長企業をマッチングする新しいスカウトサービスです。
+                あなたのキャリアの次のステップを見つけませんか？
+              </p>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: window.innerWidth < 640 ? 'column' : 'row', 
+                gap: '16px', 
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <Link
+                  href="/signup?type=student"
+                  style={{ 
+                    display: 'inline-block',
+                    backgroundColor: '#2563eb', 
+                    color: 'white', 
+                    padding: '16px 32px', 
+                    borderRadius: '8px', 
+                    fontSize: '18px', 
+                    fontWeight: '500', 
+                    textDecoration: 'none',
+                    transition: 'background-color 0.2s'
+                  }}
+                >
+                  学生として登録
+                </Link>
+                <Link
+                  href="/signup?type=company"
+                  style={{ 
+                    display: 'inline-block',
+                    border: '2px solid #2563eb', 
+                    color: '#2563eb', 
+                    padding: '14px 32px', 
+                    borderRadius: '8px', 
+                    fontSize: '18px', 
+                    fontWeight: '500', 
+                    textDecoration: 'none',
+                    backgroundColor: 'transparent',
+                    transition: 'background-color 0.2s'
+                  }}
+                >
+                  企業として登録
+                </Link>
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* Features */}
-          <div className="mt-32">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">
-              InternScoutの特徴
-            </h2>
-            <div className="grid md:grid-cols-3 gap-12">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Features Section */}
+        <section style={{ padding: '80px 0', backgroundColor: 'white' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+              <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#111827', marginBottom: '16px' }}>
+                InternScoutの特徴
+              </h2>
+              <p style={{ fontSize: '18px', color: '#4b5563', maxWidth: '768px', margin: '0 auto' }}>
+                最新のテクノロジーと人材マッチングの専門知識を組み合わせ、最高のインターン体験をお届けします。
+              </p>
+            </div>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(3, 1fr)', 
+              gap: '32px' 
+            }}>
+              <div style={{ textAlign: 'center', padding: '24px' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  backgroundColor: '#dbeafe', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  margin: '0 auto 24px auto' 
+                }}>
+                  <svg style={{ width: '32px', height: '32px', color: '#2563eb' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
                   スマートマッチング
                 </h3>
-                <p className="text-gray-600">
+                <p style={{ color: '#4b5563' }}>
                   スキルや興味に基づいて、最適なインターン生と企業をマッチング
                 </p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              
+              <div style={{ textAlign: 'center', padding: '24px' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  backgroundColor: '#dcfce7', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  margin: '0 auto 24px auto' 
+                }}>
+                  <svg style={{ width: '32px', height: '32px', color: '#16a34a' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
                   ダイレクトメッセージ
                 </h3>
-                <p className="text-gray-600">
+                <p style={{ color: '#4b5563' }}>
                   企業から学生へ直接スカウトメッセージを送信可能
                 </p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              
+              <div style={{ textAlign: 'center', padding: '24px' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  backgroundColor: '#f3e8ff', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  margin: '0 auto 24px auto' 
+                }}>
+                  <svg style={{ width: '32px', height: '32px', color: '#9333ea' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
                   成長機会
                 </h3>
-                <p className="text-gray-600">
+                <p style={{ color: '#4b5563' }}>
                   実践的なインターンシップで実務経験を積める
                 </p>
               </div>
             </div>
           </div>
-        </main>
+        </section>
 
-        {/* Footer */}
-        <footer className="py-12 border-t border-gray-200">
-          <div className="text-center text-gray-600">
-            <p>&copy; 2024 InternScout. All rights reserved.</p>
+        {/* Stats Section */}
+        <section style={{ padding: '80px 0', backgroundColor: '#2563eb' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+              <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: 'white', marginBottom: '16px' }}>
+                信頼される実績
+              </h2>
+              <p style={{ fontSize: '20px', color: '#bfdbfe' }}>
+                多くの学生と企業に選ばれ続けています
+              </p>
+            </div>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: window.innerWidth < 768 ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+              gap: '32px', 
+              textAlign: 'center' 
+            }}>
+              <div>
+                <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>1,500+</div>
+                <div style={{ color: '#bfdbfe' }}>登録学生数</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>300+</div>
+                <div style={{ color: '#bfdbfe' }}>参加企業数</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>95%</div>
+                <div style={{ color: '#bfdbfe' }}>マッチング成功率</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>24h</div>
+                <div style={{ color: '#bfdbfe' }}>平均マッチング時間</div>
+              </div>
+            </div>
           </div>
-        </footer>
-      </div>
+        </section>
+
+        {/* CTA Section */}
+        <section style={{ padding: '80px 0', backgroundColor: '#f9fafb' }}>
+          <div style={{ maxWidth: '1024px', margin: '0 auto', textAlign: 'center', padding: '0 16px' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#111827', marginBottom: '24px' }}>
+              今すぐ始めましょう
+            </h2>
+            <p style={{ fontSize: '20px', color: '#4b5563', marginBottom: '40px' }}>
+              あなたの可能性を最大限に引き出すインターンシップがここにあります。
+              未来への第一歩を踏み出してください。
+            </p>
+            
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: window.innerWidth < 640 ? 'column' : 'row', 
+              gap: '16px', 
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <Link
+                href="/signup?type=student"
+                style={{ 
+                  display: 'inline-block',
+                  backgroundColor: '#2563eb', 
+                  color: 'white', 
+                  padding: '16px 40px', 
+                  borderRadius: '8px', 
+                  fontSize: '20px', 
+                  fontWeight: '500', 
+                  textDecoration: 'none',
+                  transition: 'background-color 0.2s'
+                }}
+              >
+                学生として始める
+              </Link>
+              <Link
+                href="/signup?type=company"
+                style={{ 
+                  display: 'inline-block',
+                  border: '2px solid #2563eb', 
+                  color: '#2563eb', 
+                  padding: '14px 40px', 
+                  borderRadius: '8px', 
+                  fontSize: '20px', 
+                  fontWeight: '500', 
+                  textDecoration: 'none',
+                  backgroundColor: 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+              >
+                企業として始める
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer style={{ backgroundColor: '#111827', color: '#d1d5db', padding: '48px 0' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ 
+                width: '40px', 
+                height: '40px', 
+                backgroundColor: '#2563eb', 
+                borderRadius: '8px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+              }}>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>IS</span>
+              </div>
+              <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'white' }}>InternScout</span>
+            </div>
+            <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
+              インターン生と企業の出会いを創造し、日本の成長を支える人材エコシステムの構築を目指しています。
+            </p>
+            <div style={{ borderTop: '1px solid #374151', paddingTop: '24px' }}>
+              <p style={{ color: '#6b7280' }}>
+                &copy; 2024 InternScout. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

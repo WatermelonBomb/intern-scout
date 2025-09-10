@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  company: one
+  student: one
+  job_posting: one
+  message: MyText
+  status: MyString
+  sent_at: 2025-09-09 03:49:03
+  responded_at: 2025-09-09 03:49:03
+
+two:
+  company: two
+  student: two
+  job_posting: two
+  message: MyText
+  status: MyString
+  sent_at: 2025-09-09 03:49:03
+  responded_at: 2025-09-09 03:49:03

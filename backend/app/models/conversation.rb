@@ -8,7 +8,7 @@ class Conversation < ApplicationRecord
   validates :user1_id, uniqueness: { scope: :user2_id }
 
   scope :for_user, ->(user) { where('user1_id = ? OR user2_id = ?', user.id, user.id) }
-  scope :recent, -> { order(last_message_at: :desc) }
+  scope :recent, -> { order(Arel.sql('last_message_at DESC NULLS LAST')) }
 
   def self.between(user1, user2)
     where(

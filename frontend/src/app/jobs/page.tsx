@@ -3,11 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { jobPostings, JobPosting } from '@/lib/api';
+import { useToast } from '@/components/Toast';
+import { jobPostings, JobPosting, applications } from '@/lib/api';
+
+// Add CSS animation for spinner
+const spinnerStyles = `
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
 
 export default function JobPostingsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { showToast } = useToast();
   
   const [jobList, setJobList] = useState<JobPosting[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
@@ -16,6 +26,9 @@ export default function JobPostingsPage() {
   const [deletingJob, setDeletingJob] = useState<JobPosting | null>(null);
   const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
   const [showJobDetail, setShowJobDetail] = useState(false);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [applicationForm, setApplicationForm] = useState({ cover_letter: '' });
+  const [applying, setApplying] = useState(false);
   
   const [jobForm, setJobForm] = useState({
     title: '',
@@ -23,7 +36,8 @@ export default function JobPostingsPage() {
     requirements: '',
     salary: '',
     location: '',
-    application_deadline: ''
+    application_deadline: '',
+    employment_type: ''
   });
   
   const [saving, setSaving] = useState(false);
@@ -53,7 +67,7 @@ export default function JobPostingsPage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setJobForm(prev => ({
       ...prev,
@@ -68,7 +82,8 @@ export default function JobPostingsPage() {
       requirements: '',
       salary: '',
       location: '',
-      application_deadline: ''
+      application_deadline: '',
+      employment_type: ''
     });
   };
 
@@ -85,7 +100,8 @@ export default function JobPostingsPage() {
       requirements: job.requirements || '',
       salary: job.salary || '',
       location: job.location || '',
-      application_deadline: job.application_deadline ? job.application_deadline.split('T')[0] : ''
+      application_deadline: job.application_deadline ? job.application_deadline.split('T')[0] : '',
+      employment_type: job.employment_type || ''
     });
     setEditingJob(job);
     setShowCreateModal(true);
@@ -135,9 +151,10 @@ export default function JobPostingsPage() {
     try {
       await jobPostings.delete(job.id);
       await loadJobs();
+      showToast('求人を削除しました', 'success');
     } catch (error: any) {
       const errorMessage = error.response?.data?.errors?.[0] || '削除に失敗しました';
-      alert(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setDeletingJob(null);
     }
@@ -153,6 +170,39 @@ export default function JobPostingsPage() {
     setShowJobDetail(false);
   };
 
+  const openApplicationModal = (job: JobPosting) => {
+    setSelectedJob(job);
+    setApplicationForm({ cover_letter: '' });
+    setShowJobDetail(false);  // 求人詳細モーダルを閉じる
+    setShowApplicationModal(true);
+  };
+
+  const closeApplicationModal = () => {
+    setShowApplicationModal(false);
+    setSelectedJob(null);
+    setMessage(null);
+  };
+
+  const handleApplicationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedJob) return;
+
+    setApplying(true);
+    setMessage(null);
+
+    try {
+      await applications.create(selectedJob.id, applicationForm);
+      setMessage({ type: 'success', text: '応募を送信しました！' });
+      await loadJobs(); // Refresh job list
+      setTimeout(() => closeApplicationModal(), 2000);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.errors?.[0] || error.response?.data?.errors || '応募に失敗しました';
+      setMessage({ type: 'error', text: Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage });
+    } finally {
+      setApplying(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ja-JP');
@@ -164,8 +214,14 @@ export default function JobPostingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ 
+          animation: 'spin 1s linear infinite',
+          borderRadius: '50%',
+          height: '32px',
+          width: '32px',
+          borderBottom: '2px solid #2563eb'
+        }}></div>
       </div>
     );
   }
@@ -177,23 +233,41 @@ export default function JobPostingsPage() {
   // Student view
   if (user.user_type === 'student') {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+        <style>{spinnerStyles}</style>
         {/* Navigation */}
-        <nav className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex items-center">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">IS</span>
+        <nav style={{ backgroundColor: 'white', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' }}>
+          <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', height: '4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ 
+                    width: '2rem', 
+                    height: '2rem', 
+                    backgroundColor: '#2563eb', 
+                    borderRadius: '0.5rem', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                  }}>
+                    <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.125rem' }}>IS</span>
                   </div>
-                  <h1 className="text-xl font-bold text-gray-900">InternScout</h1>
+                  <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827' }}>InternScout</h1>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <button
                   onClick={() => router.push('/dashboard')}
-                  className="text-gray-600 hover:text-gray-900 font-medium"
+                  style={{ 
+                    color: '#4b5563', 
+                    fontWeight: '500',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#111827'}
+                  onMouseLeave={(e) => e.target.style.color = '#4b5563'}
                 >
                   ダッシュボード
                 </button>
@@ -202,55 +276,104 @@ export default function JobPostingsPage() {
           </div>
         </nav>
 
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">
+        <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '1.5rem 1rem' }}>
+          <div style={{ padding: '1.5rem 0' }}>
+            <div style={{ marginBottom: '2rem' }}>
+              <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#111827' }}>
                 求人情報
               </h1>
-              <p className="mt-2 text-gray-600">
+              <p style={{ marginTop: '0.5rem', color: '#4b5563' }}>
                 インターンシップの求人情報を確認できます
               </p>
             </div>
 
             {/* Job Listings for Students */}
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">
+            <div style={{ 
+              backgroundColor: 'white', 
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)', 
+              borderRadius: '0.5rem' 
+            }}>
+              <div style={{ 
+                padding: '1rem 1.5rem', 
+                borderBottom: '1px solid #e5e7eb' 
+              }}>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#111827' }}>
                   募集中の求人 ({jobList.length}件)
                 </h2>
               </div>
-              <div className="p-6">
+              <div style={{ padding: '1.5rem' }}>
                 {jobsLoading ? (
-                  <div className="flex justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
+                    <div style={{ 
+                      animation: 'spin 1s linear infinite',
+                      borderRadius: '50%',
+                      height: '2rem',
+                      width: '2rem',
+                      borderBottom: '2px solid #2563eb'
+                    }}></div>
                   </div>
                 ) : jobList.length === 0 ? (
-                  <div className="text-center py-12">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+                    <svg style={{ 
+                      margin: '0 auto', 
+                      height: '3rem', 
+                      width: '3rem', 
+                      color: '#9ca3af' 
+                    }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
                     </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">求人情報がありません</h3>
-                    <p className="mt-1 text-sm text-gray-500">新しい求人が投稿されるまでお待ちください</p>
+                    <h3 style={{ marginTop: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#111827' }}>求人情報がありません</h3>
+                    <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#6b7280' }}>新しい求人が投稿されるまでお待ちください</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+                    gap: '1.5rem'
+                  }}>
+                    <style>
+                      {`
+                        @media (min-width: 768px) {
+                          .job-grid {
+                            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                          }
+                        }
+                        @media (min-width: 1024px) {
+                          .job-grid {
+                            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                          }
+                        }
+                        .job-card:hover {
+                          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                        }
+                      `}
+                    </style>
+                    <div className="job-grid" style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+                      gap: '1.5rem'
+                    }}>
                     {jobList.map((job) => (
-                      <div key={job.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                        <div className="mb-4">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <div key={job.id} className="job-card" style={{ 
+                        border: '1px solid #e5e7eb', 
+                        borderRadius: '0.5rem', 
+                        padding: '1.5rem',
+                        transition: 'box-shadow 0.15s ease-in-out'
+                      }}>
+                        <div style={{ marginBottom: '1rem' }}>
+                          <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.5rem' }}>
                             {job.title}
                           </h3>
-                          <div className="space-y-2 text-sm text-gray-600">
-                            <div className="flex items-center">
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem', color: '#4b5563' }}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                               </svg>
                               {job.company?.name || '企業名未設定'}
                             </div>
                             {job.location && (
-                              <div className="flex items-center">
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
@@ -258,8 +381,8 @@ export default function JobPostingsPage() {
                               </div>
                             )}
                             {job.salary && (
-                              <div className="flex items-center">
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                 </svg>
                                 {job.salary}
@@ -268,27 +391,47 @@ export default function JobPostingsPage() {
                           </div>
                         </div>
                         
-                        <p className="text-gray-700 text-sm mb-4 line-clamp-3">
+                        <p style={{ 
+                          color: '#374151', 
+                          fontSize: '0.875rem', 
+                          marginBottom: '1rem',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
                           {job.description}
                         </p>
 
-                        <div className="flex items-center justify-between">
-                          <div className="text-xs text-gray-500">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
                             {job.application_deadline && (
-                              <div className={`${isDeadlinePassed(job.application_deadline) ? 'text-red-500' : 'text-gray-500'}`}>
+                              <div style={{ color: isDeadlinePassed(job.application_deadline) ? '#ef4444' : '#6b7280' }}>
                                 締切: {formatDate(job.application_deadline)}
                               </div>
                             )}
                           </div>
                           <button
                             onClick={() => openJobDetail(job)}
-                            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                            style={{ 
+                              padding: '0.5rem 1rem', 
+                              backgroundColor: '#2563eb', 
+                              color: 'white', 
+                              fontSize: '0.875rem', 
+                              borderRadius: '0.5rem',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.15s ease-in-out'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = '#2563eb'}
                           >
                             詳細を見る
                           </button>
                         </div>
                       </div>
                     ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -298,98 +441,403 @@ export default function JobPostingsPage() {
 
         {/* Job Detail Modal for Students */}
         {showJobDetail && selectedJob && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900">
+          <div style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            backgroundColor: 'rgba(75, 85, 99, 0.5)', 
+            overflowY: 'auto', 
+            height: '100%', 
+            width: '100%', 
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            paddingTop: '5rem',
+            paddingBottom: '5rem'
+          }}>
+            <div style={{ 
+              position: 'relative', 
+              margin: '0 auto', 
+              padding: '1.25rem', 
+              width: '100%',
+              maxWidth: '800px',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', 
+              borderRadius: '0.375rem', 
+              backgroundColor: 'white',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <div style={{ marginTop: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>
                     {selectedJob.title}
                   </h3>
                   <button
                     onClick={closeJobDetail}
-                    className="text-gray-400 hover:text-gray-600"
+                    style={{ 
+                      color: '#9ca3af', 
+                      background: 'none', 
+                      border: 'none', 
+                      cursor: 'pointer' 
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#4b5563'}
+                    onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-gray-200">
-                    <div className="space-y-4">
-                      <div className="flex items-center text-gray-600">
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
+                    gap: '1.5rem', 
+                    paddingBottom: '1.5rem', 
+                    borderBottom: '1px solid #e5e7eb' 
+                  }}>
+                    <style>
+                      {`
+                        @media (min-width: 768px) {
+                          .detail-grid {
+                            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                          }
+                        }
+                      `}
+                    </style>
+                    <div className="detail-grid" style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
+                      gap: '1.5rem', 
+                      paddingBottom: '1.5rem', 
+                      borderBottom: '1px solid #e5e7eb' 
+                    }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', color: '#4b5563' }}>
+                        <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
-                        <span className="font-medium">企業:</span>
-                        <span className="ml-2">{selectedJob.company?.name || '企業名未設定'}</span>
+                        <span style={{ fontWeight: '500' }}>企業:</span>
+                        <span style={{ marginLeft: '0.5rem' }}>{selectedJob.company?.name || '企業名未設定'}</span>
                       </div>
                       {selectedJob.location && (
-                        <div className="flex items-center text-gray-600">
-                          <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div style={{ display: 'flex', alignItems: 'center', color: '#4b5563' }}>
+                          <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          <span className="font-medium">勤務地:</span>
-                          <span className="ml-2">{selectedJob.location}</span>
+                          <span style={{ fontWeight: '500' }}>勤務地:</span>
+                          <span style={{ marginLeft: '0.5rem' }}>{selectedJob.location}</span>
                         </div>
                       )}
                       {selectedJob.salary && (
-                        <div className="flex items-center text-gray-600">
-                          <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div style={{ display: 'flex', alignItems: 'center', color: '#4b5563' }}>
+                          <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                           </svg>
-                          <span className="font-medium">給与:</span>
-                          <span className="ml-2">{selectedJob.salary}</span>
+                          <span style={{ fontWeight: '500' }}>給与:</span>
+                          <span style={{ marginLeft: '0.5rem' }}>{selectedJob.salary}</span>
                         </div>
                       )}
                     </div>
-                    <div className="space-y-4">
-                      <div className="text-gray-600">
-                        <span className="font-medium">投稿日:</span>
-                        <span className="ml-2">{formatDate(selectedJob.created_at)}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ color: '#4b5563' }}>
+                        <span style={{ fontWeight: '500' }}>投稿日:</span>
+                        <span style={{ marginLeft: '0.5rem' }}>{formatDate(selectedJob.created_at)}</span>
                       </div>
                       {selectedJob.application_deadline && (
-                        <div className="text-gray-600">
-                          <span className="font-medium">応募締切:</span>
-                          <span className={`ml-2 ${isDeadlinePassed(selectedJob.application_deadline) ? 'text-red-500 font-medium' : ''}`}>
+                        <div style={{ color: '#4b5563' }}>
+                          <span style={{ fontWeight: '500' }}>応募締切:</span>
+                          <span style={{ 
+                            marginLeft: '0.5rem',
+                            color: isDeadlinePassed(selectedJob.application_deadline) ? '#ef4444' : '#4b5563',
+                            fontWeight: isDeadlinePassed(selectedJob.application_deadline) ? '500' : 'normal'
+                          }}>
                             {formatDate(selectedJob.application_deadline)}
                             {isDeadlinePassed(selectedJob.application_deadline) && ' (締切済み)'}
                           </span>
                         </div>
                       )}
                     </div>
+                    </div>
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">仕事内容</h4>
-                    <div className="prose max-w-none">
-                      <p className="text-gray-700 whitespace-pre-line">{selectedJob.description}</p>
+                    <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem' }}>仕事内容</h4>
+                    <div style={{ maxWidth: 'none' }}>
+                      <p style={{ color: '#374151', whiteSpace: 'pre-line' }}>{selectedJob.description}</p>
                     </div>
                   </div>
 
                   {selectedJob.requirements && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3">応募要件</h4>
-                      <div className="prose max-w-none">
-                        <p className="text-gray-700 whitespace-pre-line">{selectedJob.requirements}</p>
+                      <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem' }}>応募要件</h4>
+                      <div style={{ maxWidth: 'none' }}>
+                        <p style={{ color: '#374151', whiteSpace: 'pre-line' }}>{selectedJob.requirements}</p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 mt-8">
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  gap: '1rem', 
+                  paddingTop: '1.5rem', 
+                  borderTop: '1px solid #e5e7eb', 
+                  marginTop: '2rem' 
+                }}>
                   <button
                     onClick={closeJobDetail}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                    style={{ 
+                      padding: '0.5rem 1rem', 
+                      border: '1px solid #d1d5db', 
+                      borderRadius: '0.5rem', 
+                      color: '#374151',
+                      background: 'white',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
                   >
                     閉じる
                   </button>
-                  <div className="text-sm text-gray-500 flex items-center">
-                    応募については企業に直接お問い合わせください
-                  </div>
+                  {!isDeadlinePassed(selectedJob.application_deadline || selectedJob.deadline || '') ? (
+                    selectedJob.has_applied ? (
+                      <div style={{ 
+                        padding: '0.5rem 1rem', 
+                        backgroundColor: '#dcfce7', 
+                        color: '#166534', 
+                        borderRadius: '0.5rem', 
+                        display: 'flex', 
+                        alignItems: 'center' 
+                      }}>
+                        <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        応募済み
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => openApplicationModal(selectedJob)}
+                        style={{ 
+                          padding: '0.5rem 1.5rem', 
+                          backgroundColor: '#2563eb', 
+                          color: 'white', 
+                          borderRadius: '0.5rem',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s ease-in-out'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#2563eb'}
+                      >
+                        応募する
+                      </button>
+                    )
+                  ) : (
+                    <div style={{ 
+                      padding: '0.5rem 1rem', 
+                      backgroundColor: '#fee2e2', 
+                      color: '#991b1b', 
+                      borderRadius: '0.5rem' 
+                    }}>
+                      応募締切済み
+                    </div>
+                  )}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Application Modal for Students */}
+        {showApplicationModal && selectedJob && (
+          <div style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            backgroundColor: 'rgba(75, 85, 99, 0.5)', 
+            overflowY: 'auto', 
+            height: '100%', 
+            width: '100%', 
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            paddingTop: '5rem',
+            paddingBottom: '5rem'
+          }}>
+            <div style={{ 
+              position: 'relative', 
+              margin: '0 auto', 
+              padding: '1.25rem', 
+              width: '100%',
+              maxWidth: '600px',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', 
+              borderRadius: '0.375rem', 
+              backgroundColor: 'white',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <div style={{ marginTop: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#111827' }}>
+                    応募フォーム
+                  </h3>
+                  <button
+                    onClick={closeApplicationModal}
+                    style={{ 
+                      color: '#9ca3af', 
+                      background: 'none', 
+                      border: 'none', 
+                      cursor: 'pointer' 
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = '#4b5563'}
+                    onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
+                  >
+                    <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '0.5rem' }}>
+                  <h4 style={{ fontWeight: '500', color: '#111827' }}>{selectedJob.title}</h4>
+                  <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>{selectedJob.company?.name}</p>
+                </div>
+
+                {message && (
+                  <div style={{ 
+                    marginBottom: '1rem', 
+                    borderRadius: '0.375rem', 
+                    padding: '1rem',
+                    backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2'
+                  }}>
+                    <div style={{ display: 'flex' }}>
+                      <div style={{ flexShrink: 0 }}>
+                        {message.type === 'success' ? (
+                          <svg style={{ height: '1.25rem', width: '1.25rem', color: '#4ade80' }} viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg style={{ height: '1.25rem', width: '1.25rem', color: '#f87171' }} viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <div style={{ marginLeft: '0.75rem' }}>
+                        <h3 style={{ 
+                          fontSize: '0.875rem', 
+                          fontWeight: '500',
+                          color: message.type === 'success' ? '#166534' : '#991b1b'
+                        }}>
+                          {message.text}
+                        </h3>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={handleApplicationSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
+                      志望動機 *
+                    </label>
+                    <textarea
+                      required
+                      rows={6}
+                      value={applicationForm.cover_letter}
+                      onChange={(e) => setApplicationForm({ cover_letter: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 0.75rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '0.5rem',
+                        outline: 'none',
+                        fontSize: '0.875rem'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#2563eb';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#d1d5db';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                      placeholder="この求人への志望動機やアピールポイントをご記入ください..."
+                    />
+                    <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#6b7280' }}>
+                      なぜこの企業で働きたいか、あなたのスキルや経験をどう活かせるかを具体的に記載してください。
+                    </p>
+                  </div>
+
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'flex-end', 
+                    gap: '1rem', 
+                    paddingTop: '1rem', 
+                    borderTop: '1px solid #e5e7eb' 
+                  }}>
+                    <button
+                      type="button"
+                      onClick={closeApplicationModal}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '0.5rem',
+                        color: '#374151',
+                        background: 'white',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={applying}
+                      style={{
+                        padding: '0.5rem 1.5rem',
+                        backgroundColor: applying ? '#9ca3af' : '#2563eb',
+                        color: 'white',
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        cursor: applying ? 'not-allowed' : 'pointer',
+                        opacity: applying ? 0.5 : 1
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!applying) e.target.style.backgroundColor = '#1d4ed8';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!applying) e.target.style.backgroundColor = '#2563eb';
+                      }}
+                    >
+                      {applying ? (
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <div style={{ 
+                            animation: 'spin 1s linear infinite',
+                            borderRadius: '50%',
+                            height: '1rem',
+                            width: '1rem',
+                            borderBottom: '2px solid white',
+                            marginRight: '0.5rem'
+                          }}></div>
+                          応募中...
+                        </div>
+                      ) : (
+                        '応募する'
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -400,23 +848,43 @@ export default function JobPostingsPage() {
 
   // Company view
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      <style>{spinnerStyles}</style>
       {/* Navigation */}
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">IS</span>
+      <nav style={{ backgroundColor: 'white', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' }}>
+        <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', height: '4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ 
+                  width: '2rem', 
+                  height: '2rem', 
+                  backgroundColor: '#2563eb', 
+                  borderRadius: '0.5rem', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
+                }}>
+                  <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.125rem' }}>IS</span>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">InternScout</h1>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827' }}>InternScout</h1>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <button
                 onClick={() => router.push('/dashboard')}
-                className="text-gray-600 hover:text-gray-900 font-medium"
+                style={{ 
+                  color: '#4b5563', 
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '0.375rem',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.color = '#111827'}
+                onMouseLeave={(e) => e.target.style.color = '#4b5563'}
               >
                 ダッシュボード
               </button>
@@ -425,22 +893,36 @@ export default function JobPostingsPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-8 flex items-center justify-between">
+      <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '1.5rem 1rem' }}>
+        <div>
+          <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#111827', marginBottom: '0.5rem' }}>
                 求人投稿管理
               </h1>
-              <p className="mt-2 text-gray-600">
+              <p style={{ color: '#4b5563' }}>
                 インターンシップの求人情報を管理しましょう
               </p>
             </div>
             <button
               onClick={openCreateModal}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              style={{
+                backgroundColor: '#2563eb',
+                color: 'white',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#2563eb'}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               <span>新規投稿</span>
@@ -448,76 +930,123 @@ export default function JobPostingsPage() {
           </div>
 
           {/* Job Postings List */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">
+          <div style={{ backgroundColor: 'white', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)', borderRadius: '0.5rem' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid #e5e7eb' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#111827' }}>
                 投稿済み求人 ({jobList.length}件)
               </h2>
             </div>
-            <div className="p-6">
+            <div style={{ padding: '1.5rem' }}>
               {jobsLoading ? (
-                <div className="flex justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
+                  <div style={{ 
+                    animation: 'spin 1s linear infinite',
+                    borderRadius: '50%',
+                    height: '2rem',
+                    width: '2rem',
+                    borderBottom: '2px solid #2563eb'
+                  }}></div>
                 </div>
               ) : jobList.length === 0 ? (
-                <div className="text-center py-12">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+                  <svg style={{ margin: '0 auto', height: '3rem', width: '3rem', color: '#9ca3af' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
                   </svg>
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">求人投稿がありません</h3>
-                  <p className="mt-1 text-sm text-gray-500">最初の求人を投稿してみましょう</p>
+                  <h3 style={{ marginTop: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#111827' }}>求人投稿がありません</h3>
+                  <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#6b7280' }}>最初の求人を投稿してみましょう</p>
                   <button
                     onClick={openCreateModal}
-                    className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
+                    style={{
+                      marginTop: '1rem',
+                      backgroundColor: '#2563eb',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      fontWeight: '500',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = '#2563eb'}
                   >
                     求人を投稿
                   </button>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   {jobList.map((job) => (
-                    <div key={job.id} className="border border-gray-200 rounded-lg p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <div key={job.id} style={{ border: '1px solid #e5e7eb', borderRadius: '0.5rem', padding: '1.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                        <div style={{ flex: '1' }}>
+                          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '0.5rem' }}>
                             {job.title}
                           </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div className="flex items-center text-sm text-gray-600">
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem', color: '#4b5563' }}>
+                              <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                               </svg>
                               {job.location || '場所未設定'}
                             </div>
-                            <div className="flex items-center text-sm text-gray-600">
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem', color: '#4b5563' }}>
+                              <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                               </svg>
                               {job.salary || '給与未設定'}
                             </div>
                           </div>
-                          <p className="text-gray-700 mb-4 line-clamp-3">
+                          <p style={{ color: '#374151', marginBottom: '1rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
                             {job.description}
                           </p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem', color: '#6b7280', flexWrap: 'wrap' }}>
                             <span>投稿日: {formatDate(job.created_at)}</span>
                             {job.application_deadline && (
                               <span>応募締切: {formatDate(job.application_deadline)}</span>
                             )}
                           </div>
                         </div>
-                        <div className="ml-6 flex flex-col space-y-2">
+                        <div style={{ marginLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                           <button
                             onClick={() => openEditModal(job)}
-                            className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                            style={{
+                              padding: '0.5rem 1rem',
+                              border: '1px solid #2563eb',
+                              color: '#2563eb',
+                              borderRadius: '0.5rem',
+                              backgroundColor: 'transparent',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#eff6ff'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                           >
                             編集
                           </button>
                           <button
                             onClick={() => handleDelete(job)}
                             disabled={deletingJob?.id === job.id}
-                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                            style={{
+                              padding: '0.5rem 1rem',
+                              border: '1px solid #dc2626',
+                              color: '#dc2626',
+                              borderRadius: '0.5rem',
+                              backgroundColor: 'transparent',
+                              cursor: deletingJob?.id === job.id ? 'not-allowed' : 'pointer',
+                              opacity: deletingJob?.id === job.id ? '0.5' : '1',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (deletingJob?.id !== job.id) {
+                                e.target.style.backgroundColor = '#fef2f2';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (deletingJob?.id !== job.id) {
+                                e.target.style.backgroundColor = 'transparent';
+                              }
+                            }}
                           >
                             {deletingJob?.id === job.id ? '削除中...' : '削除'}
                           </button>
@@ -534,43 +1063,91 @@ export default function JobPostingsPage() {
 
       {/* Create/Edit Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          backgroundColor: 'rgba(75, 85, 99, 0.5)', 
+          overflowY: 'auto', 
+          height: '100%', 
+          width: '100%', 
+          zIndex: 50 
+        }}>
+          <div style={{ 
+            position: 'relative', 
+            top: '5rem', 
+            margin: '0 auto', 
+            padding: '1.25rem', 
+            border: '1px solid #e5e7eb', 
+            width: '91.6667%',
+            maxWidth: '800px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', 
+            borderRadius: '0.375rem', 
+            backgroundColor: 'white' 
+          }}>
+            <style>
+              {`
+                @media (min-width: 768px) {
+                  .modal-width {
+                    width: 75% !important;
+                  }
+                }
+                @media (min-width: 1024px) {
+                  .modal-width {
+                    width: 66.6667% !important;
+                  }
+                }
+              `}
+            </style>
+            <div className="modal-width" style={{ marginTop: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#111827' }}>
                   {editingJob ? '求人情報を編集' : '新しい求人を投稿'}
                 </h3>
                 <button
                   onClick={closeModal}
-                  className="text-gray-400 hover:text-gray-600"
+                  style={{ 
+                    color: '#9ca3af', 
+                    background: 'none', 
+                    border: 'none', 
+                    cursor: 'pointer' 
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#4b5563'}
+                  onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
               {message && (
-                <div className={`mb-4 rounded-md p-4 ${
-                  message.type === 'success' ? 'bg-green-50' : 'bg-red-50'
-                }`}>
-                  <div className="flex">
-                    <div className="flex-shrink-0">
+                <div style={{ 
+                  marginBottom: '1rem', 
+                  borderRadius: '0.375rem', 
+                  padding: '1rem',
+                  backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2'
+                }}>
+                  <div style={{ display: 'flex' }}>
+                    <div style={{ flexShrink: 0 }}>
                       {message.type === 'success' ? (
-                        <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <svg style={{ height: '1.25rem', width: '1.25rem', color: '#4ade80' }} viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                       ) : (
-                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <svg style={{ height: '1.25rem', width: '1.25rem', color: '#f87171' }} viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                         </svg>
                       )}
                     </div>
-                    <div className="ml-3">
-                      <h3 className={`text-sm font-medium ${
-                        message.type === 'success' ? 'text-green-800' : 'text-red-800'
-                      }`}>
+                    <div style={{ marginLeft: '0.75rem' }}>
+                      <h3 style={{ 
+                        fontSize: '0.875rem', 
+                        fontWeight: '500',
+                        color: message.type === 'success' ? '#166534' : '#991b1b'
+                      }}>
                         {message.text}
                       </h3>
                     </div>
@@ -578,97 +1155,291 @@ export default function JobPostingsPage() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">求人タイトル *</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>求人タイトル *</label>
                   <input
                     name="title"
                     type="text"
                     required
                     value={jobForm.title}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={{
+                      marginTop: '0.25rem',
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.5rem',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#2563eb';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#d1d5db';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     placeholder="エンジニアインターン募集"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">勤務地</label>
-                    <input
-                      name="location"
-                      type="text"
-                      value={jobForm.location}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="東京都渋谷区"
-                    />
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
+                  gap: '1.5rem' 
+                }}>
+                  <style>
+                    {`
+                      @media (min-width: 768px) {
+                        .form-grid {
+                          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                        }
+                      }
+                    `}
+                  </style>
+                  <div className="form-grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
+                    gap: '1.5rem' 
+                  }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>勤務地</label>
+                      <input
+                        name="location"
+                        type="text"
+                        value={jobForm.location}
+                        onChange={handleInputChange}
+                        style={{
+                          marginTop: '0.25rem',
+                          display: 'block',
+                          width: '100%',
+                          padding: '0.5rem 0.75rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '0.5rem',
+                          outline: 'none'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#2563eb';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = '#d1d5db';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                        placeholder="東京都渋谷区"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>給与</label>
+                      <input
+                        name="salary"
+                        type="text"
+                        value={jobForm.salary}
+                        onChange={handleInputChange}
+                        style={{
+                          marginTop: '0.25rem',
+                          display: 'block',
+                          width: '100%',
+                          padding: '0.5rem 0.75rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '0.5rem',
+                          outline: 'none'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#2563eb';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = '#d1d5db';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                        placeholder="時給1,200円〜"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">給与</label>
-                    <input
-                      name="salary"
-                      type="text"
-                      value={jobForm.salary}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="時給1,200円〜"
-                    />
+                </div>
+
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
+                  gap: '1.5rem' 
+                }}>
+                  <div className="form-grid" style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
+                    gap: '1.5rem' 
+                  }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>応募締切日</label>
+                      <input
+                        name="application_deadline"
+                        type="date"
+                        value={jobForm.application_deadline}
+                        onChange={handleInputChange}
+                        style={{
+                          marginTop: '0.25rem',
+                          display: 'block',
+                          width: '100%',
+                          padding: '0.5rem 0.75rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '0.5rem',
+                          outline: 'none'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#2563eb';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = '#d1d5db';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>雇用形態 *</label>
+                      <select
+                        name="employment_type"
+                        required
+                        value={jobForm.employment_type}
+                        onChange={handleInputChange}
+                        style={{
+                          marginTop: '0.25rem',
+                          display: 'block',
+                          width: '100%',
+                          padding: '0.5rem 0.75rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '0.5rem',
+                          outline: 'none'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#2563eb';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = '#d1d5db';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      >
+                        <option value="">選択してください</option>
+                        <option value="internship">インターンシップ</option>
+                        <option value="part_time">パートタイム</option>
+                        <option value="full_time">フルタイム</option>
+                        <option value="contract">契約社員</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">応募締切日</label>
-                  <input
-                    name="application_deadline"
-                    type="date"
-                    value={jobForm.application_deadline}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">仕事内容 *</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>仕事内容 *</label>
                   <textarea
                     name="description"
                     rows={5}
                     required
                     value={jobForm.description}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={{
+                      marginTop: '0.25rem',
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.5rem',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#2563eb';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#d1d5db';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     placeholder="インターンとして参加していただく業務内容について詳しく説明してください"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">応募要件</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>応募要件</label>
                   <textarea
                     name="requirements"
                     rows={4}
                     value={jobForm.requirements}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    style={{
+                      marginTop: '0.25rem',
+                      display: 'block',
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.5rem',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#2563eb';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#d1d5db';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     placeholder="必要なスキルや経験、学年制限など"
                   />
                 </div>
 
-                <div className="flex justify-end space-x-4 pt-4">
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  gap: '1rem', 
+                  paddingTop: '1rem' 
+                }}>
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.5rem',
+                      color: '#374151',
+                      background: 'white',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
                   >
                     キャンセル
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    style={{
+                      padding: '0.5rem 1rem',
+                      backgroundColor: saving ? '#9ca3af' : '#2563eb',
+                      color: 'white',
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                      opacity: saving ? 0.5 : 1
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!saving) e.target.style.backgroundColor = '#1d4ed8';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!saving) e.target.style.backgroundColor = '#2563eb';
+                    }}
                   >
                     {saving ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ 
+                          animation: 'spin 1s linear infinite',
+                          borderRadius: '50%',
+                          height: '1rem',
+                          width: '1rem',
+                          borderBottom: '2px solid white',
+                          marginRight: '0.5rem'
+                        }}></div>
                         {editingJob ? '更新中...' : '投稿中...'}
                       </div>
                     ) : (

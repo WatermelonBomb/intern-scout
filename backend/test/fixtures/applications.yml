@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  student: one
+  job_posting: one
+  cover_letter: MyText
+  status: MyString
+  applied_at: 2025-09-09 03:25:31
+  reviewed_at: 2025-09-09 03:25:31
+
+two:
+  student: two
+  job_posting: two
+  cover_letter: MyText
+  status: MyString
+  applied_at: 2025-09-09 03:25:31
+  reviewed_at: 2025-09-09 03:25:31
