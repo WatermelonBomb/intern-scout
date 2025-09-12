@@ -418,6 +418,83 @@ export default function DashboardPage() {
                 </div>
                 <div style={{ height: '4px', background: 'linear-gradient(to right, #16a34a, #22c55e)' }}></div>
               </div>
+
+              {/* Tech Stack Search Card */}
+              <div 
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+                  borderRadius: '16px', 
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)', 
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onClick={() => router.push('/search/tech')}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'scale(1.02)';
+                  e.target.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
+                }}
+              >
+                <div style={{ padding: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div style={{ 
+                      width: '56px', 
+                      height: '56px', 
+                      background: 'linear-gradient(to right, #fef3c7, #fed7aa)', 
+                      borderRadius: '16px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      transition: 'all 0.3s'
+                    }}>
+                      <svg style={{ height: '28px', width: '28px', color: '#f59e0b' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        backgroundColor: '#8b5cf6', 
+                        borderRadius: '50%'
+                      }}></div>
+                      <span style={{ fontSize: '12px', color: '#7c3aed', fontWeight: '500' }}>NEW</span>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '8px' }}>
+                    <h3 style={{ 
+                      fontSize: '14px', 
+                      fontWeight: '500', 
+                      color: '#4b5563', 
+                      marginBottom: '4px',
+                      margin: 0
+                    }}>
+                      技術で企業検索
+                    </h3>
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
+                      使いたい技術から企業を発見
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', fontSize: '12px', color: '#6b7280' }}>
+                    <span>技術検索を始める</span>
+                    <svg style={{ 
+                      marginLeft: '4px', 
+                      width: '16px', 
+                      height: '16px',
+                      transition: 'transform 0.2s'
+                    }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div style={{ height: '4px', background: 'linear-gradient(to right, #f59e0b, #fbbf24)' }}></div>
+              </div>
             </>
           ) : (
             <>
