@@ -17,8 +17,18 @@ class Api::V1::AuthController < ApplicationController
       end
       
       token = JsonWebToken.encode(user_id: user.id)
+      
+      # Set httpOnly cookie for secure authentication
+      response.set_cookie(:auth_token, {
+        value: token,
+        expires: 1.week.from_now,
+        httponly: true,
+        secure: Rails.env.production?,
+        same_site: :lax,
+        path: '/'
+      })
+      
       render json: { 
-        token: token,
         user: user_response(user),
         company: (company ? company_response(company) : nil)
       }, status: :created
@@ -36,8 +46,19 @@ class Api::V1::AuthController < ApplicationController
       token = JsonWebToken.encode(user_id: user.id)
       company = user.companies.first if user.company?
       
+      # Set httpOnly cookie for secure authentication  
+      response.set_cookie(:auth_token, {
+        value: token,
+        expires: 1.week.from_now,
+        httponly: true,
+        secure: Rails.env.production?,
+        same_site: :lax,
+        path: '/'
+      })
+      
+      Rails.logger.info "Setting auth_token cookie in login: #{token[0..10]}..."
+      
       render json: { 
-        token: token,
         user: user_response(user),
         company: (company ? company_response(company) : nil)
       }
@@ -47,7 +68,17 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def logout
+    # Clear the httpOnly cookie
+    response.delete_cookie(:auth_token, path: '/')
     render json: { message: 'Logged out successfully' }
+  end
+
+  def me
+    company = current_user.companies.first if current_user.company?
+    render json: { 
+      user: user_response(current_user),
+      company: (company ? company_response(company) : nil)
+    }
   end
 
   private

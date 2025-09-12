@@ -1,15 +1,15 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Company, auth } from '@/lib/api';
+import { User, Company, auth, SignupRequest } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
   company: Company | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (data: any) => Promise<void>;
-  logout: () => void;
+  signup: (data: SignupRequest) => Promise<void>;
+  logout: () => Promise<void>;
   isStudent: boolean;
   isCompany: boolean;
 }
@@ -30,62 +30,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    const companyData = localStorage.getItem('company');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-      if (companyData) {
-        setCompany(JSON.parse(companyData));
-      }
-    }
+    // Check if user is logged in by making a request to the server
+    // The server will authenticate using the httpOnly cookie
+    // Temporarily disabled to fix redirect loop
+    // checkAuthStatus();
     setLoading(false);
   }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      // Make a request to check current user - server will verify cookie
+      const response = await auth.getCurrentUser();
+      const { user, company } = response.data;
+      setUser(user);
+      if (company) {
+        setCompany(company);
+      }
+    } catch {
+      // Not authenticated or error occurred
+      setUser(null);
+      setCompany(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     try {
       const response = await auth.login(email, password);
-      const { token, user, company } = response.data;
+      const { user, company } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // No need to store token in localStorage - it's now in httpOnly cookie
+      setUser(user);
       if (company) {
-        localStorage.setItem('company', JSON.stringify(company));
         setCompany(company);
       }
-      
-      setUser(user);
     } catch (error) {
       throw error;
     }
   };
 
-  const signup = async (data: any) => {
+  const signup = async (data: SignupRequest) => {
     try {
       const response = await auth.signup(data);
-      const { token, user, company } = response.data;
+      const { user, company } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // No need to store token in localStorage - it's now in httpOnly cookie
+      setUser(user);
       if (company) {
-        localStorage.setItem('company', JSON.stringify(company));
         setCompany(company);
       }
-      
-      setUser(user);
     } catch (error) {
       throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('company');
-    setUser(null);
-    setCompany(null);
+  const logout = async () => {
+    try {
+      // Call the logout endpoint to clear the httpOnly cookie
+      await auth.logout();
+    } catch (error) {
+      // Even if the request fails, clear the local state
+      console.error('Logout request failed:', error);
+    } finally {
+      setUser(null);
+      setCompany(null);
+    }
   };
 
   const value = {
