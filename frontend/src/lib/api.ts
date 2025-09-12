@@ -7,15 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-});
-
-// Add auth token to requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  withCredentials: true, // Include cookies in requests
 });
 
 // Handle auth errors
@@ -23,8 +15,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // Redirect to login page on unauthorized access
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -136,11 +127,30 @@ export interface Invitation {
   };
 }
 
+export interface SignupRequest {
+  email: string;
+  password: string;
+  password_confirmation: string;
+  first_name: string;
+  last_name: string;
+  user_type: 'student' | 'company';
+  university?: string;
+  graduation_year?: number;
+  bio?: string;
+  skills?: string;
+  company_name?: string;
+  industry?: string;
+  company_description?: string;
+  website?: string;
+  location?: string;
+}
+
 // Auth API
 export const auth = {
-  signup: (data: any) => api.post('/auth/signup', data),
+  signup: (data: SignupRequest) => api.post('/auth/signup', data),
   login: (email: string, password: string) => api.post('/auth/login', { email, password }),
   logout: () => api.delete('/auth/logout'),
+  getCurrentUser: () => api.get('/auth/me'),
 };
 
 // Users API

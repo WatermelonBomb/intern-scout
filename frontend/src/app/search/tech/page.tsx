@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon, StarIcon } from '@heroicons/react/20/solid';
 import { technologyAPI } from '@/lib/api/technology';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,9 +16,9 @@ import type {
 import { CATEGORY_LABELS } from '@/lib/types/technology';
 
 export default function TechSearchPage() {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // TODO: Add authentication check
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams(); // TODO: Use for URL state management
   
   // States
   const [technologies, setTechnologies] = useState<Technology[]>([]);
@@ -176,7 +176,7 @@ export default function TechSearchPage() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
                   >
                     <option value="all">すべて</option>
                     {categories.map(category => (
@@ -196,7 +196,7 @@ export default function TechSearchPage() {
                       placeholder="技術名で検索..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="block w-full rounded-md border-gray-300 pl-10 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full rounded-md border-gray-300 bg-white pl-10 pr-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
                     />
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export default function TechSearchPage() {
                           ...prev,
                           search_mode: e.target.value as 'AND' | 'OR'
                         }))}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
                       >
                         <option value="OR">いずれか (OR)</option>
                         <option value="AND">すべて (AND)</option>
@@ -350,7 +350,7 @@ export default function TechSearchPage() {
                           ...prev,
                           min_match_score: parseInt(e.target.value)
                         }))}
-                        className="w-full"
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                       />
                     </div>
                     
@@ -366,7 +366,7 @@ export default function TechSearchPage() {
                           ...prev,
                           location: e.target.value
                         }))}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
                       />
                     </div>
                   </div>
@@ -423,7 +423,12 @@ export default function TechSearchPage() {
                           <span>{company.job_postings_count}件の求人</span>
                         </div>
                         
-                        <p className="mt-3 text-gray-600 line-clamp-2">{company.description}</p>
+                        <p className="mt-3 text-gray-600" style={{ 
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>{company.description}</p>
                         
                         {/* Matching Technologies */}
                         <div className="mt-4">

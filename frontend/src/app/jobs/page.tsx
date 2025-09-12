@@ -596,7 +596,7 @@ export default function JobPostingsPage() {
           </div>
         </div>
 
-        {/* Job Detail Modal for Students */}
+        {/* Enhanced Job Detail Modal for Students */}
         {showJobDetail && selectedJob && (
           <div style={{ 
             position: 'fixed', 
@@ -604,7 +604,8 @@ export default function JobPostingsPage() {
             left: 0, 
             right: 0, 
             bottom: 0, 
-            backgroundColor: 'rgba(75, 85, 99, 0.5)', 
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.15) 50%, rgba(147, 51, 234, 0.1) 100%)',
+            backdropFilter: 'blur(8px)',
             overflowY: 'auto', 
             height: '100%', 
             width: '100%', 
@@ -612,168 +613,425 @@ export default function JobPostingsPage() {
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'center',
-            paddingTop: '5rem',
-            paddingBottom: '5rem'
+            paddingTop: '3rem',
+            paddingBottom: '3rem',
+            animation: 'fadeIn 0.3s ease-out'
           }}>
+            <style>
+              {`
+                @keyframes fadeIn {
+                  from { opacity: 0; }
+                  to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                  from { transform: translateY(20px); opacity: 0; }
+                  to { transform: translateY(0); opacity: 1; }
+                }
+                .detail-badge {
+                  padding: 0.5rem 1rem;
+                  border-radius: 1rem;
+                  font-size: 0.875rem;
+                  font-weight: 600;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  transition: all 0.2s ease;
+                }
+                .detail-badge:hover {
+                  transform: translateY(-1px);
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                }
+                .info-card {
+                  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                  border: 1px solid #e2e8f0;
+                  border-radius: 1rem;
+                  padding: 1.5rem;
+                  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+                  transition: all 0.2s ease;
+                }
+                .info-card:hover {
+                  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+                }
+              `}
+            </style>
             <div style={{ 
               position: 'relative', 
               margin: '0 auto', 
-              padding: '1.25rem', 
+              padding: '0', 
               width: '100%',
-              maxWidth: '800px',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', 
-              borderRadius: '0.375rem', 
-              backgroundColor: 'white',
-              maxHeight: '90vh',
-              overflowY: 'auto'
+              maxWidth: '900px',
+              maxHeight: '95vh',
+              overflowY: 'auto',
+              animation: 'slideUp 0.4s ease-out'
             }}>
-              <div style={{ marginTop: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>
-                    {selectedJob.title}
-                  </h3>
-                  <button
-                    onClick={closeJobDetail}
-                    style={{ 
-                      color: '#9ca3af', 
-                      background: 'none', 
-                      border: 'none', 
-                      cursor: 'pointer' 
-                    }}
-                    onMouseEnter={(e) => e.target.style.color = '#4b5563'}
-                    onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
-                  >
-                    <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+              <div style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: '2rem',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                overflow: 'hidden'
+              }}>
+                {/* Hero Header */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%)',
+                  color: 'white',
+                  padding: '2.5rem',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: '-100px',
+                    right: '-100px',
+                    width: '300px',
+                    height: '300px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '50%'
+                  }}></div>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-50px',
+                    left: '-50px',
+                    width: '200px',
+                    height: '200px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '50%'
+                  }}></div>
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '1rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          marginBottom: '1rem'
+                        }}>
+                          <svg style={{ width: '1rem', height: '1rem' }} fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zM8 5a1 1 0 011-1h2a1 1 0 011 1v1H8V5zM8 8a1 1 0 00-1 1v.01A1 1 0 008 10h4a1 1 0 001-1V9a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                          </svg>
+                          {selectedJob.employment_type === 'internship' ? 'インターンシップ' : 
+                           selectedJob.employment_type === 'part_time' ? 'パートタイム' : 
+                           selectedJob.employment_type === 'full_time' ? 'フルタイム' : 
+                           selectedJob.employment_type === 'contract' ? '契約社員' : 'その他'}
+                        </div>
+                        <h1 style={{ 
+                          fontSize: '2.25rem', 
+                          fontWeight: '800', 
+                          lineHeight: '1.2',
+                          marginBottom: '0.75rem',
+                          textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                        }}>
+                          {selectedJob.title}
+                        </h1>
+                        <div style={{ 
+                          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                          padding: '0.75rem 1.25rem',
+                          borderRadius: '1rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          fontSize: '1.125rem',
+                          fontWeight: '600'
+                        }}>
+                          <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+                          </svg>
+                          {selectedJob.company?.name || '企業名未設定'}
+                        </div>
+                      </div>
+                      <button
+                        onClick={closeJobDetail}
+                        style={{ 
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          border: 'none',
+                          borderRadius: '1rem',
+                          padding: '0.75rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          color: 'white'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+                          e.target.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                          e.target.style.transform = 'scale(1)';
+                        }}
+                      >
+                        <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
+                
+                {/* Content */}
+                <div style={{ padding: '2.5rem' }}>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {/* Key Information Cards */}
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
-                    gap: '1.5rem', 
-                    paddingBottom: '1.5rem', 
-                    borderBottom: '1px solid #e5e7eb' 
+                    gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+                    gap: '1.5rem',
+                    marginBottom: '2rem'
                   }}>
                     <style>
                       {`
                         @media (min-width: 768px) {
-                          .detail-grid {
+                          .info-grid {
                             grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                          }
+                        }
+                        @media (min-width: 1024px) {
+                          .info-grid {
+                            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
                           }
                         }
                       `}
                     </style>
-                    <div className="detail-grid" style={{ 
+                    <div className="info-grid" style={{
                       display: 'grid', 
-                      gridTemplateColumns: 'repeat(1, minmax(0, 1fr))', 
-                      gap: '1.5rem', 
-                      paddingBottom: '1.5rem', 
-                      borderBottom: '1px solid #e5e7eb' 
-                    }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', color: '#4b5563' }}>
-                        <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        <span style={{ fontWeight: '500' }}>企業:</span>
-                        <span style={{ marginLeft: '0.5rem' }}>{selectedJob.company?.name || '企業名未設定'}</span>
-                      </div>
+                      gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+                      gap: '1.5rem'
+                    }}>                    
                       {selectedJob.location && (
-                        <div style={{ display: 'flex', alignItems: 'center', color: '#4b5563' }}>
-                          <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span style={{ fontWeight: '500' }}>勤務地:</span>
-                          <span style={{ marginLeft: '0.5rem' }}>{selectedJob.location}</span>
+                        <div className="info-card">
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                            <div style={{
+                              background: 'linear-gradient(135deg, #10b981, #059669)',
+                              padding: '0.75rem',
+                              borderRadius: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginRight: '1rem'
+                            }}>
+                              <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0', fontWeight: '500' }}>勤務地</p>
+                              <p style={{ fontSize: '1.125rem', fontWeight: '700', color: '#111827', margin: '0' }}>{selectedJob.location}</p>
+                            </div>
+                          </div>
                         </div>
                       )}
                       {selectedJob.salary && (
-                        <div style={{ display: 'flex', alignItems: 'center', color: '#4b5563' }}>
-                          <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                          </svg>
-                          <span style={{ fontWeight: '500' }}>給与:</span>
-                          <span style={{ marginLeft: '0.5rem' }}>{selectedJob.salary}</span>
+                        <div className="info-card">
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                            <div style={{
+                              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                              padding: '0.75rem',
+                              borderRadius: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginRight: '1rem'
+                            }}>
+                              <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0', fontWeight: '500' }}>給与</p>
+                              <p style={{ fontSize: '1.125rem', fontWeight: '700', color: '#111827', margin: '0' }}>{selectedJob.salary}</p>
+                            </div>
+                          </div>
                         </div>
                       )}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <div style={{ color: '#4b5563' }}>
-                        <span style={{ fontWeight: '500' }}>投稿日:</span>
-                        <span style={{ marginLeft: '0.5rem' }}>{formatDate(selectedJob.created_at)}</span>
-                      </div>
-                      {selectedJob.application_deadline && (
-                        <div style={{ color: '#4b5563' }}>
-                          <span style={{ fontWeight: '500' }}>応募締切:</span>
-                          <span style={{ 
-                            marginLeft: '0.5rem',
-                            color: isDeadlinePassed(selectedJob.application_deadline) ? '#ef4444' : '#4b5563',
-                            fontWeight: isDeadlinePassed(selectedJob.application_deadline) ? '500' : 'normal'
+                      <div className="info-card">
+                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                          <div style={{
+                            background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                            padding: '0.75rem',
+                            borderRadius: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: '1rem'
                           }}>
-                            {formatDate(selectedJob.application_deadline)}
-                            {isDeadlinePassed(selectedJob.application_deadline) && ' (締切済み)'}
-                          </span>
+                            <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h6a2 2 0 012 2v4m-4 12v4m0-4a8 8 0 110-16m0 16a8 8 0 110-16m0 16v4" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0', fontWeight: '500' }}>投稿日</p>
+                            <p style={{ fontSize: '1.125rem', fontWeight: '700', color: '#111827', margin: '0' }}>{formatDate(selectedJob.created_at)}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {selectedJob.application_deadline && (
+                        <div className="info-card">
+                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
+                            <div style={{
+                              background: isDeadlinePassed(selectedJob.application_deadline) ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                              padding: '0.75rem',
+                              borderRadius: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginRight: '1rem'
+                            }}>
+                              <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0', fontWeight: '500' }}>応募締切</p>
+                              <p style={{ 
+                                fontSize: '1.125rem', 
+                                fontWeight: '700', 
+                                margin: '0',
+                                color: isDeadlinePassed(selectedJob.application_deadline) ? '#ef4444' : '#111827'
+                              }}>
+                                {formatDate(selectedJob.application_deadline)}
+                                {isDeadlinePassed(selectedJob.application_deadline) && (
+                                  <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#ef4444' }}> (締切済み)</span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       )}
-                    </div>
                     </div>
                   </div>
 
-                  <div>
-                    <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem' }}>仕事内容</h4>
-                    <div style={{ maxWidth: 'none' }}>
-                      <p style={{ color: '#374151', whiteSpace: 'pre-line' }}>{selectedJob.description}</p>
+                  {/* Job Description */}
+                  <div className="info-card" style={{ marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
+                      <div style={{
+                        background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+                        padding: '0.75rem',
+                        borderRadius: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: '1rem'
+                      }}>
+                        <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <h4 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', margin: '0' }}>仕事内容</h4>
+                    </div>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                      border: '1px solid #bae6fd',
+                      borderRadius: '1rem',
+                      padding: '1.5rem'
+                    }}>
+                      <p style={{ 
+                        color: '#0f172a', 
+                        whiteSpace: 'pre-line',
+                        fontSize: '1rem',
+                        lineHeight: '1.7',
+                        margin: '0'
+                      }}>
+                        {selectedJob.description}
+                      </p>
                     </div>
                   </div>
 
                   {selectedJob.requirements && (
-                    <div>
-                      <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.75rem' }}>応募要件</h4>
-                      <div style={{ maxWidth: 'none' }}>
-                        <p style={{ color: '#374151', whiteSpace: 'pre-line' }}>{selectedJob.requirements}</p>
+                    <div className="info-card" style={{ marginBottom: '2rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{
+                          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                          padding: '0.75rem',
+                          borderRadius: '1rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: '1rem'
+                        }}>
+                          <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <h4 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', margin: '0' }}>応募要件</h4>
+                      </div>
+                      <div style={{
+                        background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+                        border: '1px solid #fed7aa',
+                        borderRadius: '1rem',
+                        padding: '1.5rem'
+                      }}>
+                        <p style={{ 
+                          color: '#0f172a', 
+                          whiteSpace: 'pre-line',
+                          fontSize: '1rem',
+                          lineHeight: '1.7',
+                          margin: '0'
+                        }}>
+                          {selectedJob.requirements}
+                        </p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  gap: '1rem', 
-                  paddingTop: '1.5rem', 
-                  borderTop: '1px solid #e5e7eb', 
-                  marginTop: '2rem' 
+                {/* Action Buttons */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  borderTop: '1px solid #e2e8f0',
+                  padding: '2rem',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '1rem',
+                  borderBottomLeftRadius: '2rem',
+                  borderBottomRightRadius: '2rem'
                 }}>
                   <button
                     onClick={closeJobDetail}
                     style={{ 
-                      padding: '0.5rem 1rem', 
-                      border: '1px solid #d1d5db', 
-                      borderRadius: '0.5rem', 
+                      padding: '0.75rem 2rem',
+                      background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '1rem',
                       color: '#374151',
-                      background: 'white',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #e5e7eb, #d1d5db)';
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #f3f4f6, #e5e7eb)';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                    }}
                   >
                     閉じる
                   </button>
                   {!isDeadlinePassed(selectedJob.application_deadline || selectedJob.deadline || '') ? (
                     selectedJob.has_applied ? (
                       <div style={{ 
-                        padding: '0.5rem 1rem', 
-                        backgroundColor: '#dcfce7', 
-                        color: '#166534', 
-                        borderRadius: '0.5rem', 
-                        display: 'flex', 
-                        alignItems: 'center' 
+                        padding: '0.75rem 2rem',
+                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                        color: 'white',
+                        borderRadius: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
                       }}>
-                        <svg style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} fill="currentColor" viewBox="0 0 20 20">
+                        <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                         応募済み
@@ -782,27 +1040,53 @@ export default function JobPostingsPage() {
                       <button
                         onClick={() => openApplicationModal(selectedJob)}
                         style={{ 
-                          padding: '0.5rem 1.5rem', 
-                          backgroundColor: '#2563eb', 
-                          color: 'white', 
-                          borderRadius: '0.5rem',
+                          padding: '0.875rem 2.5rem',
+                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                          color: 'white',
+                          borderRadius: '1rem',
                           border: 'none',
                           cursor: 'pointer',
-                          transition: 'background-color 0.15s ease-in-out'
+                          fontSize: '1.125rem',
+                          fontWeight: '700',
+                          transition: 'all 0.3s ease',
+                          boxShadow: '0 8px 20px rgba(59, 130, 246, 0.4)',
+                          position: 'relative',
+                          overflow: 'hidden'
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#1d4ed8'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#2563eb'}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+                          e.target.style.transform = 'translateY(-2px) scale(1.05)';
+                          e.target.style.boxShadow = '0 12px 28px rgba(59, 130, 246, 0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+                          e.target.style.transform = 'translateY(0) scale(1)';
+                          e.target.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
+                        }}
                       >
-                        応募する
+                        <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                          </svg>
+                          応募する
+                        </span>
                       </button>
                     )
                   ) : (
                     <div style={{ 
-                      padding: '0.5rem 1rem', 
-                      backgroundColor: '#fee2e2', 
-                      color: '#991b1b', 
-                      borderRadius: '0.5rem' 
+                      padding: '0.75rem 2rem',
+                      background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                      color: 'white',
+                      borderRadius: '1rem',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
                     }}>
+                      <svg style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
                       応募締切済み
                     </div>
                   )}
@@ -812,7 +1096,7 @@ export default function JobPostingsPage() {
           </div>
         )}
 
-        {/* Application Modal for Students */}
+        {/* Enhanced Application Modal for Students */}
         {showApplicationModal && selectedJob && (
           <div style={{ 
             position: 'fixed', 
@@ -820,55 +1104,134 @@ export default function JobPostingsPage() {
             left: 0, 
             right: 0, 
             bottom: 0, 
-            backgroundColor: 'rgba(75, 85, 99, 0.5)', 
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.15) 50%, rgba(139, 92, 246, 0.1) 100%)',
+            backdropFilter: 'blur(12px)',
             overflowY: 'auto', 
             height: '100%', 
             width: '100%', 
             zIndex: 50,
             display: 'flex',
-            alignItems: 'flex-start',
+            alignItems: 'center',
             justifyContent: 'center',
-            paddingTop: '5rem',
-            paddingBottom: '5rem'
+            padding: '2rem',
+            animation: 'fadeIn 0.3s ease-out'
           }}>
             <div style={{ 
               position: 'relative', 
-              margin: '0 auto', 
-              padding: '1.25rem', 
               width: '100%',
-              maxWidth: '600px',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', 
-              borderRadius: '0.375rem', 
-              backgroundColor: 'white',
+              maxWidth: '700px',
               maxHeight: '90vh',
-              overflowY: 'auto'
+              overflowY: 'auto',
+              animation: 'slideUp 0.4s ease-out'
             }}>
-              <div style={{ marginTop: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                  <h3 style={{ fontSize: '1.125rem', fontWeight: '500', color: '#111827' }}>
-                    応募フォーム
-                  </h3>
-                  <button
-                    onClick={closeApplicationModal}
-                    style={{ 
-                      color: '#9ca3af', 
-                      background: 'none', 
-                      border: 'none', 
-                      cursor: 'pointer' 
-                    }}
-                    onMouseEnter={(e) => e.target.style.color = '#4b5563'}
-                    onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
-                  >
-                    <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+              <div style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: '2rem',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                overflow: 'hidden'
+              }}>
+                {/* Application Header */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)',
+                  color: 'white',
+                  padding: '2rem',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: '-50px',
+                    right: '-50px',
+                    width: '200px',
+                    height: '200px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '50%'
+                  }}></div>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-30px',
+                    left: '-30px',
+                    width: '150px',
+                    height: '150px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '50%'
+                  }}></div>
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '1rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          marginBottom: '1rem'
+                        }}>
+                          <svg style={{ width: '1rem', height: '1rem' }} fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          応募フォーム
+                        </div>
+                        <h1 style={{ 
+                          fontSize: '1.875rem', 
+                          fontWeight: '800', 
+                          lineHeight: '1.2',
+                          marginBottom: '0.5rem',
+                          textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                        }}>
+                          {selectedJob.title}
+                        </h1>
+                        <div style={{ 
+                          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '1rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          fontSize: '1rem',
+                          fontWeight: '600'
+                        }}>
+                          <svg style={{ width: '1rem', height: '1rem' }} fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+                          </svg>
+                          {selectedJob.company?.name || '企業名未設定'}
+                        </div>
+                      </div>
+                      <button
+                        onClick={closeApplicationModal}
+                        style={{ 
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          border: 'none',
+                          borderRadius: '1rem',
+                          padding: '0.75rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          color: 'white'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'rgba(255, 255, 255, 0.3)';
+                          e.target.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                          e.target.style.transform = 'scale(1)';
+                        }}
+                      >
+                        <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </div>
+                
+                {/* Form Content */}
+                <div style={{ padding: '2.5rem' }}>
 
-                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '0.5rem' }}>
-                  <h4 style={{ fontWeight: '500', color: '#111827' }}>{selectedJob.title}</h4>
-                  <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>{selectedJob.company?.name}</p>
-                </div>
 
                 {message && (
                   <div style={{ 
@@ -902,59 +1265,104 @@ export default function JobPostingsPage() {
                   </div>
                 )}
 
-                <form onSubmit={handleApplicationSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                      志望動機 *
-                    </label>
-                    <textarea
-                      required
-                      rows={6}
-                      value={applicationForm.cover_letter}
-                      onChange={(e) => setApplicationForm({ cover_letter: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem 0.75rem',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '0.5rem',
-                        outline: 'none',
-                        fontSize: '0.875rem'
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                      placeholder="この求人への志望動機やアピールポイントをご記入ください..."
-                    />
-                    <p style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#6b7280' }}>
-                      なぜこの企業で働きたいか、あなたのスキルや経験をどう活かせるかを具体的に記載してください。
-                    </p>
-                  </div>
+                  <form onSubmit={handleApplicationSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div className="info-card">
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <div style={{
+                          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                          padding: '0.75rem',
+                          borderRadius: '1rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: '1rem'
+                        }}>
+                          <svg style={{ width: '1.25rem', height: '1.25rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', margin: '0' }}>志望動機</h3>
+                          <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0' }}>あなたの想いを伝えましょう</p>
+                        </div>
+                      </div>
+                      <div style={{
+                        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                        border: '2px solid #bae6fd',
+                        borderRadius: '1rem',
+                        padding: '0',
+                        overflow: 'hidden'
+                      }}>
+                        <textarea
+                          required
+                          rows={8}
+                          value={applicationForm.cover_letter}
+                          onChange={(e) => setApplicationForm({ cover_letter: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '1.5rem',
+                            border: 'none',
+                            background: 'transparent',
+                            outline: 'none',
+                            fontSize: '1rem',
+                            lineHeight: '1.6',
+                            resize: 'vertical',
+                            minHeight: '200px'
+                          }}
+                          placeholder="この機会に応募した理由や、あなたの経験・スキルをどう活かせるかを具体的に教えてください。例えば、なぜこの企業で働きたいのか、あなたの学習経験やプロジェクト経験がどう役立つかなどを記載してください。"
+                        />
+                      </div>
+                      <div style={{ marginTop: '1rem', padding: '1rem', background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderRadius: '0.75rem', border: '1px solid #fed7aa' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          <svg style={{ width: '1.125rem', height: '1.125rem', color: '#d97706' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                          <p style={{ fontWeight: '600', color: '#92400e', margin: '0' }}>ヒント</p>
+                        </div>
+                        <ul style={{ margin: '0', paddingLeft: '1.25rem', color: '#92400e', fontSize: '0.875rem', lineHeight: '1.5' }}>
+                          <li>具体的なエピソードや数値を交えて記載</li>
+                          <li>企業の事業内容やビジョンへの理解を示す</li>
+                          <li>将来の目標やキャリアビジョンとの関連性</li>
+                        </ul>
+                      </div>
+                    </div>
 
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'flex-end', 
-                    gap: '1rem', 
-                    paddingTop: '1rem', 
-                    borderTop: '1px solid #e5e7eb' 
+                  {/* Action Buttons */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                    borderTop: '1px solid #e2e8f0',
+                    padding: '2rem',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '1rem',
+                    borderBottomLeftRadius: '2rem',
+                    borderBottomRightRadius: '2rem'
                   }}>
                     <button
                       type="button"
                       onClick={closeApplicationModal}
                       style={{
-                        padding: '0.5rem 1rem',
+                        padding: '0.75rem 2rem',
+                        background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
                         border: '1px solid #d1d5db',
-                        borderRadius: '0.5rem',
+                        borderRadius: '1rem',
                         color: '#374151',
-                        background: 'white',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                       }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'linear-gradient(135deg, #e5e7eb, #d1d5db)';
+                        e.target.style.transform = 'translateY(-1px)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'linear-gradient(135deg, #f3f4f6, #e5e7eb)';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                      }}
                     >
                       キャンセル
                     </button>
@@ -962,39 +1370,60 @@ export default function JobPostingsPage() {
                       type="submit"
                       disabled={applying}
                       style={{
-                        padding: '0.5rem 1.5rem',
-                        backgroundColor: applying ? '#9ca3af' : '#2563eb',
+                        padding: '1rem 3rem',
+                        background: applying ? 'linear-gradient(135deg, #9ca3af, #6b7280)' : 'linear-gradient(135deg, #10b981, #059669)',
                         color: 'white',
-                        borderRadius: '0.5rem',
+                        borderRadius: '1rem',
                         border: 'none',
                         cursor: applying ? 'not-allowed' : 'pointer',
-                        opacity: applying ? 0.5 : 1
+                        fontSize: '1.125rem',
+                        fontWeight: '700',
+                        transition: 'all 0.3s ease',
+                        boxShadow: applying ? '0 4px 12px rgba(156, 163, 175, 0.3)' : '0 8px 20px rgba(16, 185, 129, 0.4)',
+                        position: 'relative',
+                        overflow: 'hidden'
                       }}
                       onMouseEnter={(e) => {
-                        if (!applying) e.target.style.backgroundColor = '#1d4ed8';
+                        if (!applying) {
+                          e.target.style.background = 'linear-gradient(135deg, #059669, #047857)';
+                          e.target.style.transform = 'translateY(-2px) scale(1.05)';
+                          e.target.style.boxShadow = '0 12px 28px rgba(16, 185, 129, 0.5)';
+                        }
                       }}
                       onMouseLeave={(e) => {
-                        if (!applying) e.target.style.backgroundColor = '#2563eb';
+                        if (!applying) {
+                          e.target.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                          e.target.style.transform = 'translateY(0) scale(1)';
+                          e.target.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.4)';
+                        }
                       }}
                     >
                       {applying ? (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <div style={{ 
                             animation: 'spin 1s linear infinite',
                             borderRadius: '50%',
-                            height: '1rem',
-                            width: '1rem',
-                            borderBottom: '2px solid white',
-                            marginRight: '0.5rem'
+                            height: '1.25rem',
+                            width: '1.25rem',
+                            border: '2px solid transparent',
+                            borderTop: '2px solid white',
+                            borderRight: '2px solid white',
+                            marginRight: '0.75rem'
                           }}></div>
                           応募中...
                         </div>
                       ) : (
-                        '応募する'
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                          </svg>
+                          応募する
+                        </span>
                       )}
                     </button>
                   </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
