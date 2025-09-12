@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+x-frame-options: SAMEORIGIN
+x-xss-protection: 0
+x-content-type-options: nosniff
+x-permitted-cross-domain-policies: none
+referrer-policy: strict-origin-when-cross-origin
+set-cookie: auth_token=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3NTc3MjgwMjl9.SOUM32i0VWZ_GKhJMxm7zYPItTpyLNSEQWMTxGt4Nz0; path=/; expires=Fri, 19 Sep 2025 01:47:09 GMT; httponly; samesite=lax
+content-type: application/json; charset=utf-8
+vary: Accept, Origin
+etag: W/"3c85400da5c884ccac24afb09747f190"
+cache-control: max-age=0, private, must-revalidate
+x-request-id: f0cd8b6b-5153-418b-bf1c-7693895527c4
+x-runtime: 0.498130
+server-timing: start_processing.action_controller;dur=0.01, sql.active_record;dur=14.21, instantiation.active_record;dur=9.59, process_action.action_controller;dur=365.87
+content-length: 242
+

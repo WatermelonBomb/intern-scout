@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_09_084403) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_12_180439) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -39,7 +39,31 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_084403) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.datetime "tech_stack_last_updated"
+    t.string "tech_blog_url"
+    t.string "github_org_url"
+    t.decimal "tech_culture_score", precision: 3, scale: 1, default: "0.0"
+    t.integer "open_source_contributions", default: 0
+    t.index ["tech_culture_score"], name: "index_companies_on_tech_culture_score"
+    t.index ["tech_stack_last_updated"], name: "index_companies_on_tech_stack_last_updated"
     t.index ["user_id"], name: "index_companies_on_user_id"
+  end
+
+  create_table "company_tech_stacks", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.bigint "technology_id", null: false
+    t.string "usage_level", default: "main", null: false
+    t.integer "years_used", default: 1
+    t.integer "team_size"
+    t.text "project_example"
+    t.boolean "is_main_tech", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "technology_id"], name: "index_company_tech_stacks_on_company_id_and_technology_id", unique: true
+    t.index ["company_id"], name: "index_company_tech_stacks_on_company_id"
+    t.index ["is_main_tech"], name: "index_company_tech_stacks_on_is_main_tech"
+    t.index ["technology_id"], name: "index_company_tech_stacks_on_technology_id"
+    t.index ["usage_level"], name: "index_company_tech_stacks_on_usage_level"
   end
 
   create_table "conversations", force: :cascade do |t|
@@ -86,6 +110,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_084403) do
     t.date "deadline"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "required_tech_ids"
+    t.json "preferred_tech_ids"
+    t.text "tech_learning_opportunities"
+    t.json "project_tech_stack"
     t.index ["company_id"], name: "index_job_postings_on_company_id"
   end
 
@@ -131,6 +159,68 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_084403) do
     t.index ["due_date"], name: "index_selection_processes_on_due_date"
   end
 
+  create_table "student_tech_interests", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "technology_id", null: false
+    t.string "skill_level", default: "beginner", null: false
+    t.integer "learning_priority", default: 1
+    t.string "interest_type", default: "want_to_learn"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["interest_type"], name: "index_student_tech_interests_on_interest_type"
+    t.index ["learning_priority"], name: "index_student_tech_interests_on_learning_priority"
+    t.index ["skill_level"], name: "index_student_tech_interests_on_skill_level"
+    t.index ["technology_id"], name: "index_student_tech_interests_on_technology_id"
+    t.index ["user_id", "technology_id"], name: "index_student_tech_interests_on_user_id_and_technology_id", unique: true
+    t.index ["user_id"], name: "index_student_tech_interests_on_user_id"
+  end
+
+  create_table "tech_combinations", force: :cascade do |t|
+    t.bigint "primary_tech_id", null: false
+    t.bigint "secondary_tech_id", null: false
+    t.decimal "popularity_score", precision: 5, scale: 2, default: "0.0"
+    t.string "combination_type", default: "common"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["combination_type"], name: "index_tech_combinations_on_combination_type"
+    t.index ["popularity_score"], name: "index_tech_combinations_on_popularity_score"
+    t.index ["primary_tech_id", "secondary_tech_id"], name: "idx_tech_combination_unique", unique: true
+    t.index ["primary_tech_id"], name: "index_tech_combinations_on_primary_tech_id"
+    t.index ["secondary_tech_id"], name: "index_tech_combinations_on_secondary_tech_id"
+  end
+
+  create_table "tech_search_logs", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "search_query"
+    t.json "selected_technologies"
+    t.integer "result_count", default: 0
+    t.json "clicked_companies"
+    t.string "search_type", default: "company_search"
+    t.decimal "match_score_threshold", precision: 5, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_tech_search_logs_on_created_at"
+    t.index ["result_count"], name: "index_tech_search_logs_on_result_count"
+    t.index ["search_type"], name: "index_tech_search_logs_on_search_type"
+    t.index ["user_id"], name: "index_tech_search_logs_on_user_id"
+  end
+
+  create_table "technologies", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "category", null: false
+    t.text "description"
+    t.string "official_url"
+    t.string "logo_url"
+    t.integer "learning_difficulty", default: 1
+    t.decimal "market_demand_score", precision: 3, scale: 1, default: "0.0"
+    t.decimal "popularity_score", precision: 3, scale: 1, default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_technologies_on_category"
+    t.index ["name"], name: "index_technologies_on_name", unique: true
+    t.index ["popularity_score"], name: "index_technologies_on_popularity_score"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "password_digest", null: false
@@ -159,6 +249,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_084403) do
   add_foreign_key "applications", "job_postings"
   add_foreign_key "applications", "users", column: "student_id"
   add_foreign_key "companies", "users"
+  add_foreign_key "company_tech_stacks", "companies"
+  add_foreign_key "company_tech_stacks", "technologies"
   add_foreign_key "conversations", "users", column: "user1_id"
   add_foreign_key "conversations", "users", column: "user2_id"
   add_foreign_key "invitations", "job_postings"
@@ -171,4 +263,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_09_084403) do
   add_foreign_key "messages", "users", column: "sender_id"
   add_foreign_key "scout_templates", "companies"
   add_foreign_key "selection_processes", "applications"
+  add_foreign_key "student_tech_interests", "technologies"
+  add_foreign_key "student_tech_interests", "users"
+  add_foreign_key "tech_combinations", "technologies", column: "primary_tech_id"
+  add_foreign_key "tech_combinations", "technologies", column: "secondary_tech_id"
+  add_foreign_key "tech_search_logs", "users"
 end

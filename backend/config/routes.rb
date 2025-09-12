@@ -73,6 +73,49 @@ Rails.application.routes.draw do
       
       # Dashboard
       get 'dashboard/stats', to: 'dashboard#stats'
+      
+      # Technologies
+      resources :technologies, only: [:index, :show] do
+        collection do
+          get :trending
+        end
+        member do
+          get :combinations
+        end
+      end
+      
+      # Tech Search
+      post 'search/companies', to: 'tech_search#search_companies'
+      post 'search/jobs', to: 'tech_search#search_jobs'
+      
+      # Company Tech Stacks
+      resources :companies, only: [] do
+        resources :tech_stacks, controller: 'company_tech_stacks', except: [:new, :edit] do
+          collection do
+            post :bulk_create
+            get :suggestions
+          end
+        end
+      end
+      
+      # Current company's tech stacks (for authenticated company users)
+      resources :tech_stacks, controller: 'company_tech_stacks', except: [:new, :edit] do
+        collection do
+          post :bulk_create
+          get :suggestions
+        end
+      end
+      
+      # Student Tech Interests
+      resources :tech_interests, controller: 'student_tech_interests', except: [:new, :edit] do
+        collection do
+          post :bulk_create
+          get :recommendations
+        end
+      end
+      
+      # Learning Path
+      get 'learning_path/:company_id', to: 'student_tech_interests#learning_path'
     end
   end
 

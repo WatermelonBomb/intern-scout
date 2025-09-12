@@ -1,0 +1,15 @@
+HTTP/1.1 200 OK
+x-frame-options: SAMEORIGIN
+x-xss-protection: 0
+x-content-type-options: nosniff
+x-permitted-cross-domain-policies: none
+referrer-policy: strict-origin-when-cross-origin
+content-type: application/json; charset=utf-8
+vary: Accept, Origin
+etag: W/"3c85400da5c884ccac24afb09747f190"
+cache-control: max-age=0, private, must-revalidate
+x-request-id: e45467dd-823c-45ce-acfc-5cf073fe7c17
+x-runtime: 0.345682
+server-timing: start_processing.action_controller;dur=0.01, sql.active_record;dur=1.22, instantiation.active_record;dur=0.15, process_action.action_controller;dur=325.30
+content-length: 242
+
