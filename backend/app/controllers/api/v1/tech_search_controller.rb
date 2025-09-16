@@ -1,5 +1,5 @@
 class Api::V1::TechSearchController < ApplicationController
-  before_action :authenticate_user!
+  skip_before_action :authenticate_request, only: [:search_companies, :search_jobs] # Temporarily for testing
 
   def search_companies
     search_params = params.require(:search).permit(

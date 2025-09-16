@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_12_180439) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_12_191617) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -110,11 +110,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_12_180439) do
     t.date "deadline"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.json "required_tech_ids"
-    t.json "preferred_tech_ids"
+    t.jsonb "required_tech_ids"
+    t.jsonb "preferred_tech_ids"
     t.text "tech_learning_opportunities"
-    t.json "project_tech_stack"
+    t.jsonb "project_tech_stack"
     t.index ["company_id"], name: "index_job_postings_on_company_id"
+    t.index ["preferred_tech_ids"], name: "index_job_postings_on_preferred_tech_ids", using: :gin
+    t.index ["required_tech_ids"], name: "index_job_postings_on_required_tech_ids", using: :gin
   end
 
   create_table "messages", force: :cascade do |t|
@@ -192,16 +194,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_12_180439) do
   create_table "tech_search_logs", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.text "search_query"
-    t.json "selected_technologies"
+    t.jsonb "selected_technologies"
     t.integer "result_count", default: 0
-    t.json "clicked_companies"
+    t.jsonb "clicked_companies"
     t.string "search_type", default: "company_search"
     t.decimal "match_score_threshold", precision: 5, scale: 2
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["clicked_companies"], name: "index_tech_search_logs_on_clicked_companies", using: :gin
     t.index ["created_at"], name: "index_tech_search_logs_on_created_at"
     t.index ["result_count"], name: "index_tech_search_logs_on_result_count"
     t.index ["search_type"], name: "index_tech_search_logs_on_search_type"
+    t.index ["selected_technologies"], name: "index_tech_search_logs_on_selected_technologies", using: :gin
     t.index ["user_id"], name: "index_tech_search_logs_on_user_id"
   end
 

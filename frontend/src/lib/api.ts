@@ -15,8 +15,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Redirect to login page on unauthorized access
-      window.location.href = '/login';
+      // Only redirect to login if not already on login page
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -248,6 +250,48 @@ export const scoutTemplates = {
     api.patch(`/scout_templates/${id}`, { scout_template: data }),
   delete: (id: number) => api.delete(`/scout_templates/${id}`),
   clone: (id: number) => api.post(`/scout_templates/${id}/clone`),
+};
+
+// Technologies API
+export const technologies = {
+  index: (params?: { category?: string; search?: string; sort?: string; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+    return api.get(`/technologies?${searchParams.toString()}`);
+  },
+  show: (id: number) => api.get(`/technologies/${id}`),
+  trending: () => api.get('/technologies/trending'),
+  combinations: (techId: number) => api.get(`/technologies/combinations?tech_id=${techId}`),
+};
+
+// Tech Search API
+export const techSearch = {
+  searchCompanies: (searchParams: {
+    search_mode?: string;
+    min_match_score?: number;
+    company_size?: string;
+    location?: string;
+    required_tech?: number[];
+    preferred_tech?: number[];
+    excluded_tech?: number[];
+    categories?: string[];
+  }) => api.post('/search/companies', { search: searchParams }),
+  
+  searchJobs: (searchParams: {
+    search_mode?: string;
+    min_match_score?: number;
+    employment_type?: string;
+    location?: string;
+    required_tech?: number[];
+    preferred_tech?: number[];
+    excluded_tech?: number[];
+  }) => api.post('/search/jobs', { search: searchParams }),
 };
 
 // Dashboard API

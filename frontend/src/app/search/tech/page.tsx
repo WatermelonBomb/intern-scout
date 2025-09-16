@@ -150,33 +150,41 @@ export default function TechSearchPage() {
   }, [technologies]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 16px' }}>
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">技術スタック検索</h1>
-          <p className="mt-2 text-gray-600">
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '30px', fontWeight: 'bold', color: '#111827' }}>技術スタック検索</h1>
+          <p style={{ marginTop: '8px', color: '#4b5563' }}>
             使いたい技術から企業を検索し、あなたにマッチする企業を見つけましょう
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
           {/* Left Panel - Technology Selection */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
+          <div>
+            <div style={{ position: 'sticky', top: '32px' }}>
               {/* Search Technologies */}
-              <div className="rounded-lg bg-white p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">技術を選択</h3>
+              <div style={{ borderRadius: '8px', backgroundColor: 'white', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>技術を選択</h3>
                 
                 {/* Category Filter */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
                     カテゴリ
                   </label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                    style={{
+                      width: '100%',
+                      borderRadius: '6px',
+                      border: '1px solid #d1d5db',
+                      backgroundColor: 'white',
+                      padding: '8px 12px',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
                   >
                     <option value="all">すべて</option>
                     {categories.map(category => (
@@ -188,79 +196,149 @@ export default function TechSearchPage() {
                 </div>
 
                 {/* Search Input */}
-                <div className="mb-4">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <MagnifyingGlassIcon style={{ 
+                      position: 'absolute', 
+                      left: '12px', 
+                      top: '50%', 
+                      transform: 'translateY(-50%)',
+                      height: '16px', 
+                      width: '16px', 
+                      color: '#9ca3af',
+                      pointerEvents: 'none'
+                    }} />
                     <input
                       type="text"
                       placeholder="技術名で検索..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="block w-full rounded-md border-gray-300 bg-white pl-10 pr-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                      style={{
+                        width: '100%',
+                        borderRadius: '6px',
+                        border: '1px solid #d1d5db',
+                        backgroundColor: 'white',
+                        paddingLeft: '40px',
+                        paddingRight: '12px',
+                        paddingTop: '8px',
+                        paddingBottom: '8px',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
                     />
                   </div>
                 </div>
 
                 {/* Technology List */}
-                <div className="max-h-64 overflow-y-auto space-y-2">
+                <div style={{ maxHeight: '256px', overflowY: 'auto' }}>
                   {filteredTechnologies.map(tech => {
                     const type = getTechType(tech.id);
                     const isSelected = type !== null;
                     
                     return (
-                      <div key={tech.id} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${
-                            CATEGORY_LABELS[tech.category as TechCategory] ? 
-                            'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                          }`}>
+                      <div key={tech.id} style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        padding: '8px 0',
+                        borderBottom: '1px solid #f3f4f6'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            borderRadius: '4px',
+                            padding: '2px 8px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            backgroundColor: '#dbeafe',
+                            color: '#1e40af'
+                          }}>
                             {CATEGORY_LABELS[tech.category as TechCategory] || tech.category}
                           </span>
-                          <span className="text-sm text-gray-900">{tech.name}</span>
-                          <div className="flex items-center">
-                            <StarIcon className="h-3 w-3 text-yellow-400" />
-                            <span className="text-xs text-gray-500 ml-1">
+                          <span style={{ fontSize: '14px', color: '#111827' }}>{tech.name}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <StarIcon style={{ height: '12px', width: '12px', color: '#fbbf24' }} />
+                            <span style={{ fontSize: '12px', color: '#6b7280' }}>
                               {tech.popularity_score}
                             </span>
                           </div>
                         </div>
                         
                         {!isSelected ? (
-                          <div className="flex space-x-1">
+                          <div style={{ display: 'flex', gap: '4px' }}>
                             <button
                               onClick={() => handleTechSelect(tech, 'required')}
-                              className="rounded bg-red-100 px-2 py-1 text-xs text-red-700 hover:bg-red-200"
+                              style={{
+                                borderRadius: '4px',
+                                backgroundColor: '#fef2f2',
+                                color: '#b91c1c',
+                                padding: '4px 8px',
+                                fontSize: '12px',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
                               title="必須技術として追加"
                             >
                               必須
                             </button>
                             <button
                               onClick={() => handleTechSelect(tech, 'preferred')}
-                              className="rounded bg-green-100 px-2 py-1 text-xs text-green-700 hover:bg-green-200"
+                              style={{
+                                borderRadius: '4px',
+                                backgroundColor: '#f0fdf4',
+                                color: '#15803d',
+                                padding: '4px 8px',
+                                fontSize: '12px',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
                               title="歓迎技術として追加"
                             >
                               歓迎
                             </button>
                             <button
                               onClick={() => handleTechSelect(tech, 'excluded')}
-                              className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 hover:bg-gray-200"
+                              style={{
+                                borderRadius: '4px',
+                                backgroundColor: '#f9fafb',
+                                color: '#374151',
+                                padding: '4px 8px',
+                                fontSize: '12px',
+                                border: 'none',
+                                cursor: 'pointer'
+                              }}
                               title="除外技術として追加"
                             >
                               除外
                             </button>
                           </div>
                         ) : (
-                          <div className="flex items-center space-x-2">
-                            <span className={`inline-flex items-center rounded px-2 py-1 text-xs font-medium ${
-                              type === 'required' ? 'bg-red-100 text-red-800' :
-                              type === 'preferred' ? 'bg-green-100 text-green-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              borderRadius: '4px',
+                              padding: '4px 8px',
+                              fontSize: '12px',
+                              fontWeight: '500',
+                              backgroundColor: type === 'required' ? '#fef2f2' : 
+                                              type === 'preferred' ? '#f0fdf4' : '#f9fafb',
+                              color: type === 'required' ? '#b91c1c' :
+                                     type === 'preferred' ? '#15803d' : '#374151'
+                            }}>
                               {type === 'required' ? '必須' : type === 'preferred' ? '歓迎' : '除外'}
                             </span>
                             <button
                               onClick={() => handleTechRemove(tech.id)}
-                              className="text-red-500 hover:text-red-700 text-sm"
+                              style={{
+                                color: '#ef4444',
+                                fontSize: '14px',
+                                border: 'none',
+                                background: 'none',
+                                cursor: 'pointer',
+                                padding: '0 4px'
+                              }}
                             >
                               ×
                             </button>
@@ -377,18 +455,38 @@ export default function TechSearchPage() {
               <button
                 onClick={handleSearch}
                 disabled={isLoading || (searchConfig.required_tech.length === 0 && searchConfig.preferred_tech.length === 0)}
-                className="w-full flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  backgroundColor: isLoading || (searchConfig.required_tech.length === 0 && searchConfig.preferred_tech.length === 0) ? '#9ca3af' : '#2563eb',
+                  padding: '12px 16px',
+                  color: 'white',
+                  fontWeight: '500',
+                  border: 'none',
+                  cursor: isLoading || (searchConfig.required_tech.length === 0 && searchConfig.preferred_tech.length === 0) ? 'not-allowed' : 'pointer',
+                  marginTop: '16px'
+                }}
               >
                 {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTop: '2px solid white',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }}></div>
                     検索中...
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <MagnifyingGlassIcon style={{ height: '16px', width: '16px' }} />
                     企業を検索
-                  </>
+                  </div>
                 )}
               </button>
             </div>
@@ -434,8 +532,8 @@ export default function TechSearchPage() {
                         <div className="mt-4">
                           <h5 className="text-sm font-medium text-gray-900 mb-2">マッチした技術:</h5>
                           <div className="flex flex-wrap gap-2">
-                            {company.matching_technologies.map(tech => (
-                              <span key={tech.id} className="inline-flex items-center rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                            {company.matching_technologies.map((tech, index) => (
+                              <span key={`company-${company.id}-matching-${tech.id}-${index}`} className="inline-flex items-center rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
                                 {tech.name}
                               </span>
                             ))}
@@ -447,11 +545,15 @@ export default function TechSearchPage() {
                           <div className="mt-3">
                             <h5 className="text-sm font-medium text-gray-900 mb-2">主要技術:</h5>
                             <div className="flex flex-wrap gap-2">
-                              {company.main_technologies.map(tech => (
-                                <span key={tech.id} className="inline-flex items-center rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                                  {tech.name}
-                                </span>
-                              ))}
+                              {Array.from(new Set(company.main_technologies.map(tech => tech.id)))
+                                .map((uniqueId, index) => {
+                                  const tech = company.main_technologies.find(t => t.id === uniqueId);
+                                  return (
+                                    <span key={`company-${company.id}-main-${uniqueId}-${index}`} className="inline-flex items-center rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                                      {tech?.name}
+                                    </span>
+                                  );
+                                })}
                             </div>
                           </div>
                         )}
@@ -481,6 +583,12 @@ export default function TechSearchPage() {
           </div>
         </div>
       </div>
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

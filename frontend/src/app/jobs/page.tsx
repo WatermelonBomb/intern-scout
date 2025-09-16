@@ -261,6 +261,21 @@ export default function JobPostingsPage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <button
+                  onClick={() => router.push('/search/tech')}
+                  style={{ 
+                    color: '#4b5563', 
+                    fontWeight: '500',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#111827'}
+                  onMouseLeave={(e) => e.target.style.color = '#4b5563'}
+                >
+                  技術スタック検索
+                </button>
+                <button
                   onClick={() => router.push('/dashboard')}
                   style={{ 
                     color: '#4b5563', 
