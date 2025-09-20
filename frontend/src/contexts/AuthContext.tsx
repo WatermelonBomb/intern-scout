@@ -30,30 +30,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in by making a request to the server
-    // The server will authenticate using the httpOnly cookie
-    // Temporarily disabled to fix redirect loop
-    // checkAuthStatus();
-    setLoading(false);
-  }, []);
+    let isMounted = true;
 
-  const checkAuthStatus = async () => {
-    try {
-      // Make a request to check current user - server will verify cookie
-      const response = await auth.getCurrentUser();
-      const { user, company } = response.data;
-      setUser(user);
-      if (company) {
-        setCompany(company);
+    const fetchAuthStatus = async () => {
+      try {
+        const response = await auth.getCurrentUser();
+        if (!isMounted) {
+          return;
+        }
+
+        const { user: currentUser, company: currentCompany } = response.data;
+        setUser(currentUser);
+        setCompany(currentCompany ?? null);
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setUser(null);
+        setCompany(null);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    } catch {
-      // Not authenticated or error occurred
-      setUser(null);
-      setCompany(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    void fetchAuthStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {

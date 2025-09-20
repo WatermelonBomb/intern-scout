@@ -1,11 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function ScoutManagementRedirect() {
-  const { user } = useAuth();
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow p-8 text-center">

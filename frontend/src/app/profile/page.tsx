@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { users } from '@/lib/api';
-import { getErrorMessage, validateEmail, validateRequired } from '@/lib/errorHandler';
+import { users, type UserUpdatePayload, type CompanyProfilePayload } from '@/lib/api';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function ProfilePage() {
   const { user, company, loading } = useAuth();
@@ -53,7 +53,9 @@ export default function ProfilePage() {
     }
   }, [user, company]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -69,7 +71,7 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
-      const updateData: any = {
+      const updateData: UserUpdatePayload & CompanyProfilePayload = {
         first_name: formData.first_name,
         last_name: formData.last_name,
       };
@@ -77,7 +79,7 @@ export default function ProfilePage() {
       // Add student-specific fields
       if (user.user_type === 'student') {
         updateData.university = formData.university;
-        updateData.graduation_year = formData.graduation_year ? parseInt(formData.graduation_year) : null;
+        updateData.graduation_year = formData.graduation_year ? parseInt(formData.graduation_year, 10) : null;
         updateData.bio = formData.bio;
         updateData.skills = formData.skills;
       }
@@ -122,7 +124,7 @@ export default function ProfilePage() {
         localStorage.setItem('company', JSON.stringify(updatedCompany));
       }
 
-    } catch (error: any) {
+    } catch (error) {
       const errorMessage = getErrorMessage(error, 'プロフィールの更新に失敗しました');
       setMessage({ type: 'error', text: errorMessage });
     } finally {
@@ -224,8 +226,8 @@ export default function ProfilePage() {
                   backgroundColor: 'transparent',
                   cursor: 'pointer'
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#111827'}
-                onMouseLeave={(e) => e.target.style.color = '#4b5563'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#111827'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#4b5563'}
               >
                 ダッシュボード
               </button>
@@ -354,13 +356,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="田中"
                     />
@@ -389,13 +391,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="太郎"
                     />
@@ -440,13 +442,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="東京大学"
                       />
@@ -462,7 +464,7 @@ export default function ProfilePage() {
                       <select
                         name="graduation_year"
                         value={formData.graduation_year}
-                        onChange={(e) => handleInputChange(e as any)}
+                        onChange={handleInputChange}
                         style={{
                         marginTop: '0.25rem',
                         display: 'block',
@@ -474,13 +476,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       >
                         <option value="">選択してください</option>
@@ -515,13 +517,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="JavaScript, React, Python（カンマ区切り）"
                       />
@@ -557,13 +559,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="あなたの経験や興味、目標について教えてください"
                       />
@@ -610,13 +612,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="株式会社サンプル"
                       />
@@ -646,13 +648,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="IT・ソフトウェア"
                       />
@@ -681,13 +683,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="東京都渋谷区"
                       />
@@ -716,13 +718,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="https://example.com"
                       />
@@ -751,13 +753,13 @@ export default function ProfilePage() {
                         transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                       }}
                       onFocus={(e) => {
-                        e.target.style.outline = 'none';
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.outline = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                         placeholder="会社の事業内容、文化、ビジョンについて教えてください"
                       />
@@ -833,19 +835,19 @@ export default function ProfilePage() {
                     fontWeight: '500'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#f9fafb';
+                    (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = '#ffffff';
+                    (e.target as HTMLElement).style.backgroundColor = '#ffffff';
                   }}
                   onFocus={(e) => {
-                    e.target.style.outline = 'none';
-                    e.target.style.borderColor = '#2563eb';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    (e.target as HTMLElement).style.outline = 'none';
+                    (e.target as HTMLElement).style.borderColor = '#2563eb';
+                    (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
+                    (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                    (e.target as HTMLElement).style.boxShadow = 'none';
                   }}
                 >
                   キャンセル
@@ -866,17 +868,17 @@ export default function ProfilePage() {
                     fontWeight: '500'
                   }}
                   onMouseEnter={(e) => {
-                    if (!saving) e.target.style.backgroundColor = '#1d4ed8';
+                    if (!saving) (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
                   }}
                   onMouseLeave={(e) => {
-                    if (!saving) e.target.style.backgroundColor = '#2563eb';
+                    if (!saving) (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                   }}
                   onFocus={(e) => {
-                    e.target.style.outline = 'none';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    (e.target as HTMLElement).style.outline = 'none';
+                    (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.boxShadow = 'none';
+                    (e.target as HTMLElement).style.boxShadow = 'none';
                   }}
                 >
                   {saving ? (

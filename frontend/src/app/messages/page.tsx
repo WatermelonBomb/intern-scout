@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
-import { messages, Message } from '@/lib/api';
+import { messages, type Message } from '@/lib/api';
+import { getErrorMessage } from '@/lib/errors';
 
 // Add CSS animation for spinner
 const spinnerStyles = `
@@ -19,9 +20,15 @@ export default function MessagesPage() {
   const router = useRouter();
   const { showToast } = useToast();
   
+  type ConversationUser = Message['sender'];
+  interface ConversationDetail {
+    user: ConversationUser;
+    messages: Message[];
+  }
+
   const [messageList, setMessageList] = useState<Message[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [selectedConversation, setSelectedConversation] = useState<{user: any, messages: Message[]} | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<ConversationDetail | null>(null);
   
   // Reply functionality - always visible
   const [replyContent, setReplyContent] = useState('');
@@ -33,13 +40,7 @@ export default function MessagesPage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    if (user) {
-      loadMessages();
-    }
-  }, [user]);
-
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     setMessagesLoading(true);
     try {
       const response = await messages.index();
@@ -49,7 +50,13 @@ export default function MessagesPage() {
     } finally {
       setMessagesLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      void loadMessages();
+    }
+  }, [user, loadMessages]);
 
   const handleConversationClick = async (clickedMessage: Message) => {
     const otherUser = clickedMessage.sender.id === user?.id ? clickedMessage.receiver : clickedMessage.sender;
@@ -109,9 +116,8 @@ export default function MessagesPage() {
       // Reset form
       setReplyContent('');
       
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || 'メッセージの送信に失敗しました';
-      showToast(errorMessage, 'error');
+    } catch (error) {
+      showToast(getErrorMessage(error, 'メッセージの送信に失敗しました'), 'error');
     } finally {
       setSendingReply(false);
     }
@@ -185,8 +191,8 @@ export default function MessagesPage() {
                   cursor: 'pointer',
                   transition: 'color 0.15s ease-in-out'
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#111827'}
-                onMouseLeave={(e) => e.target.style.color = '#4b5563'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#111827'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#4b5563'}
               >
                 ダッシュボード
               </button>
@@ -281,12 +287,12 @@ export default function MessagesPage() {
                       }}
                       onMouseEnter={(e) => {
                         if (selectedConversation?.user.id !== conversation.otherUser.id) {
-                          e.target.style.backgroundColor = '#f9fafb';
+                          (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (selectedConversation?.user.id !== conversation.otherUser.id) {
-                          e.target.style.backgroundColor = 'white';
+                          (e.target as HTMLElement).style.backgroundColor = 'white';
                         }
                       }}
                     >
@@ -464,12 +470,12 @@ export default function MessagesPage() {
                             lineHeight: '1.25'
                           }}
                           onFocus={(e) => {
-                            e.target.style.borderColor = '#3b82f6';
-                            e.target.style.boxShadow = '0 0 0 1px #3b82f6';
+                            (e.target as HTMLElement).style.borderColor = '#3b82f6';
+                            (e.target as HTMLElement).style.boxShadow = '0 0 0 1px #3b82f6';
                           }}
                           onBlur={(e) => {
-                            e.target.style.borderColor = '#d1d5db';
-                            e.target.style.boxShadow = 'none';
+                            (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                            (e.target as HTMLElement).style.boxShadow = 'none';
                           }}
                           onKeyPress={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -497,12 +503,12 @@ export default function MessagesPage() {
                         }}
                         onMouseEnter={(e) => {
                           if (!sendingReply && replyContent.trim()) {
-                            e.target.style.backgroundColor = '#2563eb';
+                            (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (!sendingReply && replyContent.trim()) {
-                            e.target.style.backgroundColor = '#3b82f6';
+                            (e.target as HTMLElement).style.backgroundColor = '#3b82f6';
                           }
                         }}
                       >

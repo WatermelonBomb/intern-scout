@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { isAxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import type { ApiErrorResponse } from '@/lib/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,19 +24,24 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Login error:', err);
       let errorMessage = 'ログインに失敗しました';
       
-      if (err.response?.data?.errors) {
-        if (Array.isArray(err.response.data.errors)) {
-          errorMessage = err.response.data.errors[0];
-        } else {
-          errorMessage = err.response.data.errors;
+      if (isAxiosError<ApiErrorResponse>(err)) {
+        if (err.response?.data?.errors) {
+          const { errors } = err.response.data;
+          if (Array.isArray(errors)) {
+            errorMessage = errors[0];
+          } else if (errors) {
+            errorMessage = errors;
+          }
+        } else if (err.response?.status === 401) {
+          errorMessage = 'メールアドレスまたはパスワードが正しくありません';
+        } else if (err.message) {
+          errorMessage = err.message;
         }
-      } else if (err.response?.status === 401) {
-        errorMessage = 'メールアドレスまたはパスワードが正しくありません';
-      } else if (err.message) {
+      } else if (err instanceof Error && err.message) {
         errorMessage = err.message;
       }
       
@@ -259,12 +266,12 @@ export default function LoginPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="your@example.com"
                     />
@@ -313,12 +320,12 @@ export default function LoginPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="パスワードを入力してください"
                     />
@@ -362,14 +369,14 @@ export default function LoginPage() {
                   }}
                   onMouseEnter={(e) => {
                     if (!loading) {
-                      e.target.style.transform = 'scale(1.02)';
-                      e.target.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                      (e.target as HTMLElement).style.transform = 'scale(1.02)';
+                      (e.target as HTMLElement).style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!loading) {
-                      e.target.style.transform = 'scale(1)';
-                      e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                      (e.target as HTMLElement).style.transform = 'scale(1)';
+                      (e.target as HTMLElement).style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
                     }
                   }}
                 >
@@ -414,10 +421,10 @@ export default function LoginPage() {
                     transition: 'color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.color = '#111827';
+                    (e.target as HTMLElement).style.color = '#111827';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.color = '#4b5563';
+                    (e.target as HTMLElement).style.color = '#4b5563';
                   }}
                 >
                   <svg style={{ 

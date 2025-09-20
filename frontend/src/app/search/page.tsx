@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { users, messages, User } from '@/lib/api';
+import { users, messages, type User, type UserSearchParams } from '@/lib/api';
+import { useToast } from '@/components/Toast';
+import { getErrorMessage } from '@/lib/errors';
 
 // Add CSS animation for spinner
 const spinnerStyles = `
@@ -18,7 +20,12 @@ export default function StudentSearchPage() {
   const router = useRouter();
   const { showToast } = useToast();
   
-  const [students, setStudents] = useState<User[]>([]);
+  interface FiltersState {
+    skills: string;
+    university: string;
+    graduation_year: string;
+  }
+
   const [filteredStudents, setFilteredStudents] = useState<User[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
@@ -30,7 +37,7 @@ export default function StudentSearchPage() {
   const [sendingMessage, setSendingMessage] = useState(false);
 
   // Search filters
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FiltersState>({
     skills: '',
     university: '',
     graduation_year: ''
@@ -42,32 +49,31 @@ export default function StudentSearchPage() {
     }
   }, [user, loading, isCompany, router]);
 
-  useEffect(() => {
-    if (isCompany) {
-      loadStudents();
-    }
-  }, [isCompany]);
-
-  const loadStudents = async (searchParams?: any) => {
+  const loadStudents = useCallback(async (searchParams?: UserSearchParams) => {
     setSearchLoading(true);
     try {
       const response = searchParams && Object.keys(searchParams).length > 0 
         ? await users.search(searchParams)
         : await users.index();
-      setStudents(response.data);
       setFilteredStudents(response.data);
     } catch (error) {
       console.error('Failed to load students:', error);
     } finally {
       setSearchLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isCompany) {
+      void loadStudents();
+    }
+  }, [isCompany, loadStudents]);
 
   const handleSearch = async () => {
-    const searchParams: any = {};
+    const searchParams: UserSearchParams = {};
     if (filters.skills) searchParams.skills = filters.skills;
     if (filters.university) searchParams.university = filters.university;
-    if (filters.graduation_year) searchParams.graduation_year = filters.graduation_year;
+    if (filters.graduation_year) searchParams.graduation_year = Number(filters.graduation_year);
 
     await loadStudents(searchParams);
   };
@@ -89,9 +95,8 @@ export default function StudentSearchPage() {
       
       // Show success message (you could implement a toast notification here)
       showToast('スカウトメッセージを送信しました！', 'success');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || 'メッセージの送信に失敗しました';
-      showToast(errorMessage, 'error');
+    } catch (error) {
+      showToast(getErrorMessage(error, 'メッセージの送信に失敗しました'), 'error');
     } finally {
       setSendingMessage(false);
     }
@@ -173,8 +178,8 @@ ${company?.name}
                   cursor: 'pointer',
                   transition: 'color 0.15s ease-in-out'
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#111827'}
-                onMouseLeave={(e) => e.target.style.color = '#4b5563'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#111827'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#4b5563'}
               >
                 ダッシュボード
               </button>
@@ -232,12 +237,12 @@ ${company?.name}
                       transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#3b82f6';
-                      e.target.style.boxShadow = '0 0 0 1px #3b82f6';
+                      (e.target as HTMLElement).style.borderColor = '#3b82f6';
+                      (e.target as HTMLElement).style.boxShadow = '0 0 0 1px #3b82f6';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = 'none';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.boxShadow = 'none';
                     }}
                   />
                 </div>
@@ -260,12 +265,12 @@ ${company?.name}
                       transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#3b82f6';
-                      e.target.style.boxShadow = '0 0 0 1px #3b82f6';
+                      (e.target as HTMLElement).style.borderColor = '#3b82f6';
+                      (e.target as HTMLElement).style.boxShadow = '0 0 0 1px #3b82f6';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = 'none';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.boxShadow = 'none';
                     }}
                   />
                 </div>
@@ -287,12 +292,12 @@ ${company?.name}
                       transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#3b82f6';
-                      e.target.style.boxShadow = '0 0 0 1px #3b82f6';
+                      (e.target as HTMLElement).style.borderColor = '#3b82f6';
+                      (e.target as HTMLElement).style.boxShadow = '0 0 0 1px #3b82f6';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = 'none';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.boxShadow = 'none';
                     }}
                   >
                     <option value="">すべて</option>
@@ -320,12 +325,12 @@ ${company?.name}
                   }}
                   onMouseEnter={(e) => {
                     if (!searchLoading) {
-                      e.target.style.backgroundColor = '#2563eb';
+                      (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!searchLoading) {
-                      e.target.style.backgroundColor = '#3b82f6';
+                      (e.target as HTMLElement).style.backgroundColor = '#3b82f6';
                     }
                   }}
                 >
@@ -346,8 +351,8 @@ ${company?.name}
                     cursor: 'pointer',
                     transition: 'all 0.15s ease-in-out'
                   }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#f9fafb'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'white'}
                 >
                   リセット
                 </button>
@@ -483,8 +488,8 @@ ${company?.name}
                           cursor: 'pointer',
                           transition: 'background-color 0.15s ease-in-out'
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                        onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#2563eb'}
+                        onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#3b82f6'}
                       >
                         スカウトメッセージを送る
                       </button>
@@ -539,8 +544,8 @@ ${company?.name}
                     borderRadius: '0.25rem',
                     transition: 'color 0.15s ease-in-out'
                   }}
-                  onMouseEnter={(e) => e.target.style.color = '#4b5563'}
-                  onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.color = '#4b5563'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.color = '#9ca3af'}
                 >
                   <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -567,12 +572,12 @@ ${company?.name}
                       transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#3b82f6';
-                      e.target.style.boxShadow = '0 0 0 1px #3b82f6';
+                      (e.target as HTMLElement).style.borderColor = '#3b82f6';
+                      (e.target as HTMLElement).style.boxShadow = '0 0 0 1px #3b82f6';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = 'none';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.boxShadow = 'none';
                     }}
                   />
                 </div>
@@ -596,12 +601,12 @@ ${company?.name}
                       transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#3b82f6';
-                      e.target.style.boxShadow = '0 0 0 1px #3b82f6';
+                      (e.target as HTMLElement).style.borderColor = '#3b82f6';
+                      (e.target as HTMLElement).style.boxShadow = '0 0 0 1px #3b82f6';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = 'none';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.boxShadow = 'none';
                     }}
                   />
                 </div>
@@ -620,8 +625,8 @@ ${company?.name}
                     fontWeight: '500',
                     transition: 'background-color 0.15s ease-in-out'
                   }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                  onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#f9fafb'}
+                  onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'white'}
                 >
                   キャンセル
                 </button>
@@ -641,12 +646,12 @@ ${company?.name}
                   }}
                   onMouseEnter={(e) => {
                     if (!(sendingMessage || !messageForm.subject || !messageForm.content)) {
-                      e.target.style.backgroundColor = '#2563eb';
+                      (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!(sendingMessage || !messageForm.subject || !messageForm.content)) {
-                      e.target.style.backgroundColor = '#3b82f6';
+                      (e.target as HTMLElement).style.backgroundColor = '#3b82f6';
                     }
                   }}
                 >

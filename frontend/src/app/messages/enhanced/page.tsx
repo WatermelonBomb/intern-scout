@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
-import { conversations, messages, Conversation, Message } from '@/lib/api';
+import { conversations, messages, type Conversation, type Message } from '@/lib/api';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function EnhancedMessagesPage() {
   const { user, loading } = useAuth();
@@ -33,21 +34,11 @@ export default function EnhancedMessagesPage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    if (user) {
-      loadConversations();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [conversationMessages]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     setConversationsLoading(true);
     try {
       const response = await conversations.index();
@@ -57,7 +48,17 @@ export default function EnhancedMessagesPage() {
     } finally {
       setConversationsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      void loadConversations();
+    }
+  }, [user, loadConversations]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversationMessages]);
 
   const loadConversationMessages = async (conversation: Conversation) => {
     setMessagesLoading(true);
@@ -132,9 +133,8 @@ export default function EnhancedMessagesPage() {
       setReplyForm({ subject: '', content: '' });
       setIsReplying(false);
       
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || 'メッセージの送信に失敗しました';
-      showToast(errorMessage, 'error');
+    } catch (error) {
+      showToast(getErrorMessage(error, 'メッセージの送信に失敗しました'), 'error');
     } finally {
       setSendingReply(false);
     }

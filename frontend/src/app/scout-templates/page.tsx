@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/Toast';
-import { scoutTemplates } from '../../lib/api';
+import { scoutTemplates } from '@/lib/api';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ScoutTemplate {
   id: number;
@@ -28,11 +29,7 @@ export default function ScoutTemplates() {
     message: ''
   });
 
-  useEffect(() => {
-    loadTemplates();
-  }, []);
-
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     setLoading(true);
     try {
       const response = await scoutTemplates.index();
@@ -42,7 +39,11 @@ export default function ScoutTemplates() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadTemplates();
+  }, [loadTemplates]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,15 +59,14 @@ export default function ScoutTemplates() {
       } else {
         await scoutTemplates.create(formData);
       }
-      
+
       setShowForm(false);
       setEditingTemplate(null);
       setFormData({ name: '', subject: '', message: '' });
-      loadTemplates();
-    } catch (error: any) {
+      await loadTemplates();
+    } catch (error) {
       console.error('Failed to save template:', error);
-      const errorMessage = error.response?.data?.errors?.[0] || 'テンプレートの保存に失敗しました';
-      showToast(errorMessage, 'error');
+      showToast(getErrorMessage(error, 'テンプレートの保存に失敗しました'), 'error');
     }
   };
 
@@ -87,11 +87,10 @@ export default function ScoutTemplates() {
 
     try {
       await scoutTemplates.delete(template.id);
-      loadTemplates();
-    } catch (error: any) {
+      await loadTemplates();
+    } catch (error) {
       console.error('Failed to delete template:', error);
-      const errorMessage = error.response?.data?.errors?.[0] || 'テンプレートの削除に失敗しました';
-      showToast(errorMessage, 'error');
+      showToast(getErrorMessage(error, 'テンプレートの削除に失敗しました'), 'error');
     }
   };
 
@@ -100,22 +99,20 @@ export default function ScoutTemplates() {
       await scoutTemplates.update(template.id, {
         is_active: !template.is_active
       });
-      loadTemplates();
-    } catch (error: any) {
+      await loadTemplates();
+    } catch (error) {
       console.error('Failed to toggle template status:', error);
-      const errorMessage = error.response?.data?.errors?.[0] || 'ステータスの更新に失敗しました';
-      showToast(errorMessage, 'error');
+      showToast(getErrorMessage(error, 'ステータスの更新に失敗しました'), 'error');
     }
   };
 
   const handleClone = async (template: ScoutTemplate) => {
     try {
       await scoutTemplates.clone(template.id);
-      loadTemplates();
-    } catch (error: any) {
+      await loadTemplates();
+    } catch (error) {
       console.error('Failed to clone template:', error);
-      const errorMessage = error.response?.data?.errors?.[0] || 'テンプレートのコピーに失敗しました';
-      showToast(errorMessage, 'error');
+      showToast(getErrorMessage(error, 'テンプレートのコピーに失敗しました'), 'error');
     }
   };
 

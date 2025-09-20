@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { applications, Application } from '@/lib/api';
+import { applications, type Application } from '@/lib/api';
+import { getErrorMessage } from '@/lib/errors';
+
+type StatusFilter = 'all' | Application['status'];
 
 export default function ApplicationsPage() {
   const { user, loading } = useAuth();
@@ -13,7 +16,7 @@ export default function ApplicationsPage() {
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [updating, setUpdating] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -52,7 +55,7 @@ export default function ApplicationsPage() {
     setMessage(null);
   };
 
-  const handleStatusUpdate = async (applicationId: number, newStatus: string) => {
+  const handleStatusUpdate = async (applicationId: number, newStatus: Application['status']) => {
     setUpdating(`${applicationId}-${newStatus}`);
     setMessage(null);
 
@@ -67,21 +70,21 @@ export default function ApplicationsPage() {
         if (updatedApp) {
           setSelectedApplication({
             ...updatedApp,
-            status: newStatus as any,
+            status: newStatus,
             reviewed_at: new Date().toISOString()
           });
         }
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || 'ステータスの更新に失敗しました';
+    } catch (error) {
+      const errorMessage = getErrorMessage(error, 'ステータスの更新に失敗しました');
       setMessage({ type: 'error', text: errorMessage });
     } finally {
       setUpdating(null);
     }
   };
 
-  const getStatusText = (status: string) => {
-    const statusMap: { [key: string]: string } = {
+  const getStatusText = (status: Application['status']) => {
+    const statusMap: Record<Application['status'], string> = {
       pending: '未確認',
       reviewed: '確認済み',
       accepted: '合格',
@@ -90,8 +93,8 @@ export default function ApplicationsPage() {
     return statusMap[status] || status;
   };
 
-  const getStatusColor = (status: string) => {
-    const colorMap: { [key: string]: string } = {
+  const getStatusColor = (status: Application['status']) => {
+    const colorMap: Record<Application['status'], string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       reviewed: 'bg-blue-100 text-blue-800',
       accepted: 'bg-green-100 text-green-800',
@@ -171,7 +174,7 @@ export default function ApplicationsPage() {
               <label className="text-sm font-medium text-gray-700">フィルター:</label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">すべて</option>

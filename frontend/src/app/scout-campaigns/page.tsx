@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { invitations } from '../../lib/api';
+import React, { useState, useEffect, useCallback } from 'react';
+import { invitations } from '@/lib/api';
 import { useToast } from '@/components/Toast';
 import Link from 'next/link';
+import { getErrorMessage } from '@/lib/errors';
 
 interface Invitation {
   id: number;
@@ -39,19 +40,17 @@ interface CampaignStats {
   sent_at: string;
 }
 
+type StatusFilter = 'all' | 'sent' | 'accepted' | 'rejected';
+
 export default function ScoutCampaigns() {
   const { showToast } = useToast();
   const [sentInvitations, setSentInvitations] = useState<Invitation[]>([]);
   const [campaignStats, setCampaignStats] = useState<CampaignStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'campaigns' | 'individual'>('campaigns');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'accepted' | 'rejected'>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  useEffect(() => {
-    loadScoutData();
-  }, []);
-
-  const loadScoutData = async () => {
+  const loadScoutData = useCallback(async () => {
     setLoading(true);
     try {
       // 企業が送信したスカウト一覧を取得
@@ -66,7 +65,11 @@ export default function ScoutCampaigns() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadScoutData();
+  }, [loadScoutData]);
 
   const calculateCampaignStats = (invitationsList: Invitation[]) => {
     const campaignMap = new Map<string, CampaignStats>();
@@ -123,10 +126,9 @@ export default function ScoutCampaigns() {
 
     try {
       await invitations.delete(invitationId);
-      loadScoutData();
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || 'スカウト削除に失敗しました';
-      showToast(errorMessage, 'error');
+      void loadScoutData();
+    } catch (error) {
+      showToast(getErrorMessage(error, 'スカウト削除に失敗しました'), 'error');
     }
   };
 
@@ -283,7 +285,7 @@ export default function ScoutCampaigns() {
                   <label className="text-sm font-medium text-gray-700">ステータス:</label>
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
                     className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">すべて</option>

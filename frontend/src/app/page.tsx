@@ -2,18 +2,36 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && user) {
-      router.push('/dashboard');
+  const primaryCta = useMemo(() => {
+    if (loading) {
+      return {
+        label: '読み込み中…',
+        href: '#',
+        handler: undefined
+      };
     }
-  }, [user, loading, router]);
+
+    if (user) {
+      return {
+        label: 'ダッシュボードに進む',
+        href: '/dashboard',
+        handler: () => router.push('/dashboard')
+      };
+    }
+
+    return {
+      label: '学生として登録',
+      href: '/signup?type=student',
+      handler: undefined
+    };
+  }, [loading, router, user]);
 
   if (loading) {
     return (
@@ -115,28 +133,29 @@ export default function Home() {
                 InternScoutは、優秀なインターン生と成長企業をマッチングする新しいスカウトサービスです。
                 あなたのキャリアの次のステップを見つけませんか？
               </p>
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: window.innerWidth < 640 ? 'column' : 'row', 
-                gap: '16px', 
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '16px',
                 justifyContent: 'center',
                 alignItems: 'center'
               }}>
                 <Link
-                  href="/signup?type=student"
-                  style={{ 
+                  href={primaryCta.href}
+                  onClick={primaryCta.handler}
+                  style={{
                     display: 'inline-block',
-                    backgroundColor: '#2563eb', 
-                    color: 'white', 
-                    padding: '16px 32px', 
-                    borderRadius: '8px', 
-                    fontSize: '18px', 
-                    fontWeight: '500', 
+                    backgroundColor: '#2563eb',
+                    color: 'white',
+                    padding: '16px 32px',
+                    borderRadius: '8px',
+                    fontSize: '18px',
+                    fontWeight: '500',
                     textDecoration: 'none',
                     transition: 'background-color 0.2s'
                   }}
                 >
-                  学生として登録
+                  {primaryCta.label}
                 </Link>
                 <Link
                   href="/signup?type=company"

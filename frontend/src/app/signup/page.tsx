@@ -1,21 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { isAxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import type { ApiErrorResponse } from '@/lib/api';
+
+export const dynamic = 'force-dynamic';
 
 export default function SignupPage() {
-  const searchParams = useSearchParams();
-  const userType = searchParams.get('type') || 'student';
-  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     password_confirmation: '',
     first_name: '',
     last_name: '',
-    user_type: userType,
+    user_type: 'student' as 'student' | 'company',
     // Student fields
     university: '',
     graduation_year: '',
@@ -36,6 +37,22 @@ export default function SignupPage() {
   const { signup } = useAuth();
   const router = useRouter();
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const typeParam = params.get('type');
+
+    if (typeParam === 'company' || typeParam === 'student') {
+      setFormData(prev => ({
+        ...prev,
+        user_type: typeParam,
+      }));
+    }
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -55,11 +72,27 @@ export default function SignupPage() {
     }
 
     try {
-      await signup(formData);
+      const signupData = {
+        ...formData,
+        graduation_year: formData.graduation_year ? Number(formData.graduation_year) : undefined
+      };
+      await signup(signupData);
       router.push('/dashboard');
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.errors?.[0] || err.response?.data?.errors || '登録に失敗しました';
-      setError(Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage);
+    } catch (err) {
+      if (isAxiosError<ApiErrorResponse>(err)) {
+        const responseErrors = err.response?.data?.errors;
+        if (Array.isArray(responseErrors)) {
+          setError(responseErrors.join(', '));
+        } else if (responseErrors) {
+          setError(responseErrors);
+        } else {
+          setError('登録に失敗しました');
+        }
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('登録に失敗しました');
+      }
     } finally {
       setLoading(false);
     }
@@ -283,12 +316,12 @@ export default function SignupPage() {
                       boxSizing: 'border-box'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#2563eb';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      (e.target as HTMLElement).style.borderColor = '#2563eb';
+                      (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = 'none';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.boxShadow = 'none';
                     }}
                     placeholder="田中"
                   />
@@ -318,12 +351,12 @@ export default function SignupPage() {
                       boxSizing: 'border-box'
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#2563eb';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                      (e.target as HTMLElement).style.borderColor = '#2563eb';
+                      (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = 'none';
+                      (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                      (e.target as HTMLElement).style.boxShadow = 'none';
                     }}
                     placeholder="太郎"
                   />
@@ -355,12 +388,12 @@ export default function SignupPage() {
                     boxSizing: 'border-box'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#2563eb';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    (e.target as HTMLElement).style.borderColor = '#2563eb';
+                    (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
+                    (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                    (e.target as HTMLElement).style.boxShadow = 'none';
                   }}
                   placeholder="your@example.com"
                 />
@@ -391,12 +424,12 @@ export default function SignupPage() {
                     boxSizing: 'border-box'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#2563eb';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    (e.target as HTMLElement).style.borderColor = '#2563eb';
+                    (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
+                    (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                    (e.target as HTMLElement).style.boxShadow = 'none';
                   }}
                   placeholder="8文字以上"
                 />
@@ -427,12 +460,12 @@ export default function SignupPage() {
                     boxSizing: 'border-box'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#2563eb';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                    (e.target as HTMLElement).style.borderColor = '#2563eb';
+                    (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
+                    (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                    (e.target as HTMLElement).style.boxShadow = 'none';
                   }}
                   placeholder="パスワードを再入力"
                 />
@@ -457,10 +490,10 @@ export default function SignupPage() {
                   marginTop: '8px'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#1d4ed8';
+                  (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#2563eb';
+                  (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                 }}
               >
                 次へ
@@ -497,12 +530,12 @@ export default function SignupPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="東京大学"
                     />
@@ -534,12 +567,12 @@ export default function SignupPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="2025"
                     />
@@ -569,12 +602,12 @@ export default function SignupPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="JavaScript, React, Python（カンマ区切り）"
                     />
@@ -606,12 +639,12 @@ export default function SignupPage() {
                         fontFamily: 'inherit'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="あなたの経験や興味について教えてください"
                     />
@@ -644,12 +677,12 @@ export default function SignupPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="株式会社サンプル"
                     />
@@ -680,12 +713,12 @@ export default function SignupPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="IT・ソフトウェア"
                     />
@@ -715,12 +748,12 @@ export default function SignupPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="東京都渋谷区"
                     />
@@ -750,12 +783,12 @@ export default function SignupPage() {
                         boxSizing: 'border-box'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="https://example.com"
                     />
@@ -787,12 +820,12 @@ export default function SignupPage() {
                         fontFamily: 'inherit'
                       }}
                       onFocus={(e) => {
-                        e.target.style.borderColor = '#2563eb';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                        (e.target as HTMLElement).style.borderColor = '#2563eb';
+                        (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = '#d1d5db';
-                        e.target.style.boxShadow = 'none';
+                        (e.target as HTMLElement).style.borderColor = '#d1d5db';
+                        (e.target as HTMLElement).style.boxShadow = 'none';
                       }}
                       placeholder="会社の事業内容や文化について教えてください"
                     />
@@ -819,10 +852,10 @@ export default function SignupPage() {
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#f9fafb';
+                    (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'white';
+                    (e.target as HTMLElement).style.backgroundColor = 'white';
                   }}
                 >
                   戻る
@@ -847,12 +880,12 @@ export default function SignupPage() {
                   }}
                   onMouseEnter={(e) => {
                     if (!loading) {
-                      e.target.style.backgroundColor = '#1d4ed8';
+                      (e.target as HTMLElement).style.backgroundColor = '#1d4ed8';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!loading) {
-                      e.target.style.backgroundColor = '#2563eb';
+                      (e.target as HTMLElement).style.backgroundColor = '#2563eb';
                     }
                   }}
                 >

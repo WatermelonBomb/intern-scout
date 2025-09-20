@@ -33,6 +33,10 @@ interface ToastProviderProps {
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const hideToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
   const showToast = useCallback((message: string, type: ToastType, duration = 5000) => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     const newToast: Toast = { id, message, type, duration };
@@ -44,11 +48,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         hideToast(id);
       }, duration);
     }
-  }, []);
-
-  const hideToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  }, [hideToast]);
 
   const getToastStyles = (type: ToastType) => {
     const baseStyles = {
@@ -60,8 +60,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      maxWidth: '400px',
-      animation: 'slideIn 0.3s ease-out'
+      maxWidth: '400px'
     };
 
     const typeStyles = {
@@ -133,21 +132,6 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         zIndex: 9999,
         pointerEvents: 'none'
       }}>
-        <style>
-          {`
-            @keyframes slideIn {
-              from {
-                transform: translateX(100%);
-                opacity: 0;
-              }
-              to {
-                transform: translateX(0);
-                opacity: 1;
-              }
-            }
-          `}
-        </style>
-        
         {toasts.map((toast) => (
           <div key={toast.id} style={getToastStyles(toast.type)}>
             <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>

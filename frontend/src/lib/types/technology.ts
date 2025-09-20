@@ -29,6 +29,11 @@ export interface TechSearchParams {
   company_size?: string;
   location?: string;
   min_match_score: number;
+  experience_level?: 'beginner' | 'intermediate' | 'expert';
+  remote_preference?: 'any' | 'remote' | 'hybrid';
+  salary_range?: [number, number];
+  work_culture?: string[];
+  growth_potential?: number;
 }
 
 export interface CompanySearchResult {
@@ -82,22 +87,7 @@ export interface CompanyTechStack {
   updated_at: string;
 }
 
-export const TECH_CATEGORIES = [
-  'frontend',
-  'backend', 
-  'database',
-  'devops',
-  'mobile',
-  'ai_ml',
-  'data_science',
-  'testing',
-  'design',
-  'other'
-] as const;
-
-export type TechCategory = typeof TECH_CATEGORIES[number];
-
-export const CATEGORY_LABELS: Record<TechCategory, string> = {
+const CATEGORY_LABEL_MAP = {
   frontend: 'フロントエンド',
   backend: 'バックエンド',
   database: 'データベース',
@@ -107,7 +97,161 @@ export const CATEGORY_LABELS: Record<TechCategory, string> = {
   data_science: 'データサイエンス',
   testing: 'テスト',
   design: 'デザイン',
+  language: 'プログラミング言語',
+  cloud: 'クラウド',
+  security: 'セキュリティ',
+  infrastructure: 'インフラ',
+  analytics: 'アナリティクス',
+  qa: 'QA',
+  tooling: 'ツール',
+  product: 'プロダクト',
   other: 'その他'
+} as const;
+
+export type TechCategory = keyof typeof CATEGORY_LABEL_MAP;
+
+export const TECH_CATEGORIES = Object.keys(CATEGORY_LABEL_MAP) as TechCategory[];
+
+export const CATEGORY_LABELS: Record<TechCategory, string> = CATEGORY_LABEL_MAP;
+
+type CategoryTheme = {
+  badge: string;
+  mutedBadge: string;
+  accent: string;
+  border: string;
+};
+
+const CATEGORY_THEME_MAP: Record<TechCategory, CategoryTheme> = {
+  frontend: {
+    badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-100',
+    mutedBadge: 'bg-blue-100/60 text-blue-800',
+    accent: 'text-blue-600',
+    border: 'border-blue-100'
+  },
+  backend: {
+    badge: 'bg-purple-50 text-purple-700 ring-1 ring-purple-100',
+    mutedBadge: 'bg-purple-100/60 text-purple-800',
+    accent: 'text-purple-600',
+    border: 'border-purple-100'
+  },
+  database: {
+    badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-100',
+    mutedBadge: 'bg-amber-100/60 text-amber-800',
+    accent: 'text-amber-600',
+    border: 'border-amber-100'
+  },
+  devops: {
+    badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100',
+    mutedBadge: 'bg-emerald-100/60 text-emerald-800',
+    accent: 'text-emerald-600',
+    border: 'border-emerald-100'
+  },
+  mobile: {
+    badge: 'bg-pink-50 text-pink-700 ring-1 ring-pink-100',
+    mutedBadge: 'bg-pink-100/60 text-pink-800',
+    accent: 'text-pink-600',
+    border: 'border-pink-100'
+  },
+  ai_ml: {
+    badge: 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100',
+    mutedBadge: 'bg-indigo-100/60 text-indigo-800',
+    accent: 'text-indigo-600',
+    border: 'border-indigo-100'
+  },
+  data_science: {
+    badge: 'bg-sky-50 text-sky-700 ring-1 ring-sky-100',
+    mutedBadge: 'bg-sky-100/60 text-sky-800',
+    accent: 'text-sky-600',
+    border: 'border-sky-100'
+  },
+  testing: {
+    badge: 'bg-lime-50 text-lime-700 ring-1 ring-lime-100',
+    mutedBadge: 'bg-lime-100/60 text-lime-800',
+    accent: 'text-lime-600',
+    border: 'border-lime-100'
+  },
+  design: {
+    badge: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100',
+    mutedBadge: 'bg-rose-100/60 text-rose-800',
+    accent: 'text-rose-600',
+    border: 'border-rose-100'
+  },
+  language: {
+    badge: 'bg-cyan-50 text-cyan-700 ring-1 ring-cyan-100',
+    mutedBadge: 'bg-cyan-100/60 text-cyan-800',
+    accent: 'text-cyan-600',
+    border: 'border-cyan-100'
+  },
+  cloud: {
+    badge: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200',
+    mutedBadge: 'bg-slate-200/60 text-slate-800',
+    accent: 'text-slate-700',
+    border: 'border-slate-200'
+  },
+  security: {
+    badge: 'bg-red-50 text-red-700 ring-1 ring-red-100',
+    mutedBadge: 'bg-red-100/60 text-red-800',
+    accent: 'text-red-600',
+    border: 'border-red-100'
+  },
+  infrastructure: {
+    badge: 'bg-orange-50 text-orange-700 ring-1 ring-orange-100',
+    mutedBadge: 'bg-orange-100/60 text-orange-800',
+    accent: 'text-orange-600',
+    border: 'border-orange-100'
+  },
+  analytics: {
+    badge: 'bg-fuchsia-50 text-fuchsia-700 ring-1 ring-fuchsia-100',
+    mutedBadge: 'bg-fuchsia-100/60 text-fuchsia-800',
+    accent: 'text-fuchsia-600',
+    border: 'border-fuchsia-100'
+  },
+  qa: {
+    badge: 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-100',
+    mutedBadge: 'bg-yellow-100/60 text-yellow-800',
+    accent: 'text-yellow-600',
+    border: 'border-yellow-100'
+  },
+  tooling: {
+    badge: 'bg-teal-50 text-teal-700 ring-1 ring-teal-100',
+    mutedBadge: 'bg-teal-100/60 text-teal-800',
+    accent: 'text-teal-600',
+    border: 'border-teal-100'
+  },
+  product: {
+    badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100',
+    mutedBadge: 'bg-emerald-100/60 text-emerald-800',
+    accent: 'text-emerald-600',
+    border: 'border-emerald-100'
+  },
+  other: {
+    badge: 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
+    mutedBadge: 'bg-gray-200/60 text-gray-800',
+    accent: 'text-gray-600',
+    border: 'border-gray-200'
+  }
+};
+
+const DEFAULT_THEME: CategoryTheme = {
+  badge: 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
+  mutedBadge: 'bg-gray-100 text-gray-700',
+  accent: 'text-gray-600',
+  border: 'border-gray-200'
+};
+
+export const getCategoryTheme = (category: string): CategoryTheme =>
+  CATEGORY_THEME_MAP[category as TechCategory] ?? DEFAULT_THEME;
+
+export const getCategoryLabel = (category: string): string => {
+  const label = CATEGORY_LABEL_MAP[category as TechCategory];
+  if (label) {
+    return label;
+  }
+
+  // Convert unknown categories like "data_platform" to "Data Platform"
+  return category
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 export const SKILL_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert'] as const;

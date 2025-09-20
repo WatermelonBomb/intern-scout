@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { students, jobPostings, scoutTemplates, invitations } from '../../lib/api';
+import React, { useState, useEffect, useCallback } from 'react';
+import { students, jobPostings, scoutTemplates, invitations, type StudentSearchFilters } from '@/lib/api';
+import { useToast } from '@/components/Toast';
+import { getErrorMessage } from '@/lib/errors';
 
 interface Student {
   id: number;
@@ -55,7 +57,16 @@ export default function BulkScout() {
   });
 
   // フィルター状態
-  const [filters, setFilters] = useState({
+  interface FiltersState {
+    major: string;
+    preferred_location: string;
+    experience_level: string;
+    graduation_year: string;
+    programming_language: string;
+    skills: string;
+  }
+
+  const [filters, setFilters] = useState<FiltersState>({
     major: '',
     preferred_location: '',
     experience_level: '',
@@ -77,10 +88,6 @@ export default function BulkScout() {
     loadInitialData();
   }, []);
 
-  useEffect(() => {
-    searchStudents();
-  }, [filters]);
-
   const loadInitialData = async () => {
     try {
       const [jobPostingsResponse, templatesResponse, filterOptionsResponse] = await Promise.all([
@@ -97,21 +104,30 @@ export default function BulkScout() {
     }
   };
 
-  const searchStudents = async () => {
+  const searchStudents = useCallback(async () => {
     setStudentsLoading(true);
     try {
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, value]) => value !== '')
-      );
-      
-      const response = await students.index({ ...cleanFilters, limit: 100 });
+      const searchFilters: StudentSearchFilters = { limit: 100 };
+
+      if (filters.major) searchFilters.major = filters.major;
+      if (filters.preferred_location) searchFilters.preferred_location = filters.preferred_location;
+      if (filters.experience_level) searchFilters.experience_level = filters.experience_level;
+      if (filters.graduation_year) searchFilters.graduation_year = Number(filters.graduation_year);
+      if (filters.programming_language) searchFilters.programming_language = filters.programming_language;
+      if (filters.skills) searchFilters.skills = filters.skills;
+
+      const response = await students.index(searchFilters);
       setStudentsList(response.data.data);
     } catch (error) {
       console.error('Failed to search students:', error);
     } finally {
       setStudentsLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    void searchStudents();
+  }, [searchStudents]);
 
   const handleStudentSelection = (studentId: number) => {
     setSelectedStudents(prev => {
@@ -167,9 +183,9 @@ export default function BulkScout() {
       setSubject('');
       setSelectedTemplate('');
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to send bulk scouts:', error);
-      const errorMessage = error.response?.data?.errors?.[0] || 'スカウト送信に失敗しました';
+      const errorMessage = getErrorMessage(error, 'スカウト送信に失敗しました');
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -377,7 +393,7 @@ export default function BulkScout() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">対象求人</label>
                   <select
                     value={selectedJobPosting}
-                    onChange={(e) => setSelectedJobPosting(e.target.value)}
+                    onChange={(e) => setSelectedJobPosting(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">求人を選択してください</option>

@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
-import { applications, Application } from '@/lib/api';
+import { applications, type Application } from '@/lib/api';
+import { getErrorMessage } from '@/lib/errors';
+
+type StatusFilter = 'all' | Application['status'];
 
 export default function MyApplicationsPage() {
   const { user, loading } = useAuth();
@@ -15,7 +18,7 @@ export default function MyApplicationsPage() {
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [withdrawing, setWithdrawing] = useState<number | null>(null);
 
   useEffect(() => {
@@ -61,16 +64,15 @@ export default function MyApplicationsPage() {
     try {
       await applications.delete(applicationId);
       await loadApplications();
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || '応募の取り下げに失敗しました';
-      showToast(errorMessage, 'error');
+    } catch (error) {
+      showToast(getErrorMessage(error, '応募の取り下げに失敗しました'), 'error');
     } finally {
       setWithdrawing(null);
     }
   };
 
-  const getStatusText = (status: string) => {
-    const statusMap: { [key: string]: string } = {
+  const getStatusText = (status: Application['status']) => {
+    const statusMap: Record<Application['status'], string> = {
       pending: '審査中',
       reviewed: '確認済み',
       accepted: '合格',
@@ -79,8 +81,8 @@ export default function MyApplicationsPage() {
     return statusMap[status] || status;
   };
 
-  const getStatusColor = (status: string) => {
-    const colorMap: { [key: string]: string } = {
+  const getStatusColor = (status: Application['status']) => {
+    const colorMap: Record<Application['status'], string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       reviewed: 'bg-blue-100 text-blue-800',
       accepted: 'bg-green-100 text-green-800',
@@ -95,7 +97,9 @@ export default function MyApplicationsPage() {
   };
 
   const filteredApplications = applicationsList.filter(app => {
-    if (statusFilter === 'all') return true;
+    if (statusFilter === 'all') {
+      return true;
+    }
     return app.status === statusFilter;
   });
 
@@ -160,7 +164,7 @@ export default function MyApplicationsPage() {
               <label className="text-sm font-medium text-gray-700">フィルター:</label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">すべて</option>

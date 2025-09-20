@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
-import { invitations, Invitation } from '@/lib/api';
+import { invitations, type Invitation } from '@/lib/api';
+import { getErrorMessage } from '@/lib/errors';
+
+type InvitationStatusFilter = 'all' | Invitation['status'];
 
 export default function InvitationsPage() {
   const { user, loading } = useAuth();
@@ -15,7 +18,7 @@ export default function InvitationsPage() {
   const [invitationsLoading, setInvitationsLoading] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState<Invitation | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<InvitationStatusFilter>('all');
   const [responding, setResponding] = useState<number | null>(null);
 
   useEffect(() => {
@@ -24,13 +27,7 @@ export default function InvitationsPage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    if (user) {
-      loadInvitations();
-    }
-  }, [user]);
-
-  const loadInvitations = async () => {
+  const loadInvitations = useCallback(async () => {
     setInvitationsLoading(true);
     try {
       const response = await invitations.index(false, statusFilter === 'all' ? undefined : statusFilter);
@@ -40,7 +37,13 @@ export default function InvitationsPage() {
     } finally {
       setInvitationsLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    if (user) {
+      void loadInvitations();
+    }
+  }, [user, loadInvitations]);
 
   const openDetailModal = (invitation: Invitation) => {
     setSelectedInvitation(invitation);
@@ -63,8 +66,8 @@ export default function InvitationsPage() {
       showToast('スカウトを承諾しました。メッセージ機能でやり取りを開始してください。', 'success');
       await loadInvitations();
       closeDetailModal();
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || 'スカウトの承諾に失敗しました';
+    } catch (error) {
+      const errorMessage = getErrorMessage(error, 'スカウトの承諾に失敗しました');
       showToast(errorMessage, 'error');
     } finally {
       setResponding(null);
@@ -82,16 +85,16 @@ export default function InvitationsPage() {
       showToast('スカウトを辞退しました。', 'success');
       await loadInvitations();
       closeDetailModal();
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.errors?.[0] || 'スカウトの辞退に失敗しました';
+    } catch (error) {
+      const errorMessage = getErrorMessage(error, 'スカウトの辞退に失敗しました');
       showToast(errorMessage, 'error');
     } finally {
       setResponding(null);
     }
   };
 
-  const getStatusText = (status: string) => {
-    const statusMap: { [key: string]: string } = {
+  const getStatusText = (status: Invitation['status']) => {
+    const statusMap: Record<Invitation['status'], string> = {
       sent: '受信中',
       accepted: '承諾済み',
       rejected: '辞退済み',
@@ -100,8 +103,8 @@ export default function InvitationsPage() {
     return statusMap[status] || status;
   };
 
-  const getStatusColor = (status: string) => {
-    const colorMap: { [key: string]: string } = {
+  const getStatusColor = (status: Invitation['status']) => {
+    const colorMap: Record<Invitation['status'], string> = {
       sent: 'bg-blue-100 text-blue-800',
       accepted: 'bg-green-100 text-green-800',
       rejected: 'bg-red-100 text-red-800',
@@ -125,9 +128,11 @@ export default function InvitationsPage() {
     return date.toLocaleDateString('ja-JP');
   };
 
-  const filteredInvitations = invitationsList.filter(inv => {
-    if (statusFilter === 'all') return true;
-    return inv.status === statusFilter;
+  const filteredInvitations = invitationsList.filter(invitationItem => {
+    if (statusFilter === 'all') {
+      return true;
+    }
+    return invitationItem.status === statusFilter;
   });
 
   if (loading) {
@@ -197,7 +202,7 @@ export default function InvitationsPage() {
               <label className="text-sm font-medium text-gray-700">フィルター:</label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value as InvitationStatusFilter)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">すべて</option>
